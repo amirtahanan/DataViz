@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Assist Network</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow-y: auto;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+        }
+        svg {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        .links line {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+        .nodes circle {
+            stroke: #fff;
+            stroke-width: 1.5px;
+            cursor: pointer;
+        }
+        .labels text {
+            font-size: 14px;
+            pointer-events: none;
+            font-family: Arial, sans-serif;
+            text-shadow: 
+                -1px -1px 0 #fff,  
+                 1px -1px 0 #fff,
+                -1px  1px 0 #fff,
+                 1px  1px 0 #fff;
+        }
+        #tooltip {
+            position: absolute;
+            text-align: left;
+            padding: 10px;
+            font: 14px sans-serif;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: opacity 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+<div id="tooltip"></div>
+<svg id="network"></svg>
+<div id="assist-matrix"></div>
+<!-- <svg id="shot-heatmap"></svg> -->
+
+<script>
+d3.json("assist_network.json").then(function(data) {
+    
+    if (!data.nodes || !data.links) {
+        console.error("Data format incorrect. Expected an object with 'nodes' and 'links' arrays.");
+        return;
+    }
+
+    // Clean up the API's name formatting so 'source'/'target' exactly match node 'id'
+    const nodeIds = new Set(data.nodes.map(d => d.id));
+
+    data.links = data.links
+        .map(link => {
+            ['source', 'target'].forEach(key => {
+                if (typeof link[key] === 'string' && link[key].includes(',')) {
+                    const parts = link[key].split(', ');
+                    // Converts "Flagg, Cooper" into "Cooper Flagg"
+                    link[key] = parts[1] + ' ' + parts[0];
+                }
+            });
+            return link;
+        })
+        // Keep only links where both endpoints exist as nodes
+        .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
+
+    // Keep only players that appear in at least one assist (as passer or receiver)
+    const activeIds = new Set();
+    data.links.forEach(link => {
+        activeIds.add(link.source);
+        activeIds.add(link.target);
+    });
+    data.nodes = data.nodes.filter(node => activeIds.has(node.id));
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    const svg = d3.select("#network")
+        .attr("viewBox", [0, 0, width, height]);
+
+    svg.append("defs").append("marker")
+        .attr("id", "arrowhead")
+        .attr("viewBox", "-0 -5 10 10")
+        .attr("refX", 25)
+        .attr("refY", 0)
+        .attr("orient", "auto")
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("xoverflow", "visible")
+        .append("svg:path")
+        .attr("d", "M 0,-5 L 10 ,0 L 0,5")
+        .attr("fill", "#999")
+        .style("stroke","none");
+
+    const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink(data.links).id(d => d.id).distance(380))
+        .force("charge", d3.forceManyBody().strength(-1400))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("x", d3.forceX(width / 2).strength(0.06))
+        .force("y", d3.forceY(height / 2).strength(0.06))
+        .force("collide", d3.forceCollide().radius(70))
+        .alphaDecay(0.02);
+
+    const link = svg.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(data.links)
+        .join("line")
+        .attr("stroke-width", d => Math.sqrt(d.value) * 1.5)
+        .attr("marker-end", "url(#arrowhead)");
+
+    const tooltip = d3.select("#tooltip");
+
+    const nodeGroup = svg.append("g")
+        .attr("class", "nodes")
+        .selectAll("g")
+        .data(data.nodes)
+        .join("g")
+        .call(drag(simulation));
+
+    nodeGroup.append("circle")
+        .attr("r", 15)
+        .attr("fill", d => color(d.group || 1)) 
+        .on("mouseover", function(event, d) {
+            d3.select(this).attr("stroke", "#333").attr("stroke-width", 3);
+            tooltip.transition().duration(200).style("opacity", .9);
+            tooltip.html(`
+                <strong>${d.id}</strong><br/>
+                Team: ${d.team || 'N/A'}<br/>
+                PPG: ${d.ppg || 0}
+            `)
+            .style("left", (event.pageX + 15) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1.5);
+            tooltip.transition().duration(500).style("opacity", 0);
+        });
+
+    nodeGroup.append("text")
+        .attr("class", "labels")
+        .attr("dx", 20)
+        .attr("dy", ".35em")
+        .text(d => d.id);
+
+    simulation.on("tick", () => {
+        link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        nodeGroup.attr("transform", d => `translate(${d.x},${d.y})`);
+    });
+
+    function drag(simulation) {
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+        
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+        
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+        
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    }
+
+    // --- Assist matrix heatmap (assister vs shooter) ---
+
+    const players = data.nodes.map(d => d.id);
+    const n = players.length;
+
+    // Aggregate values by assister -> shooter
+    const valueByPair = new Map();
+    data.links.forEach(l => {
+        // After d3.forceLink, source/target may be node objects; normalize to ids
+        const assister = typeof l.source === "string" ? l.source : l.source.id;
+        const shooter = typeof l.target === "string" ? l.target : l.target.id;
+        const key = assister + "||" + shooter;
+        valueByPair.set(key, (valueByPair.get(key) || 0) + (l.value || 0));
+    });
+
+    const matrixData = [];
+    players.forEach((shooter, row) => {
+        players.forEach((assister, col) => {
+            const key = assister + "||" + shooter;
+            const value = valueByPair.get(key) || 0;
+            matrixData.push({ row, col, assister, shooter, value });
+        });
+    });
+
+    const cellSize = 24;
+    const margin = { top: 160, right: 40, bottom: 40, left: 160 };
+    const mWidth = margin.left + margin.right + n * cellSize;
+    const mHeight = margin.top + margin.bottom + n * cellSize;
+
+    const svgMatrix = d3.select("#assist-matrix")
+        .append("svg")
+        .attr("width", mWidth)
+        .attr("height", mHeight);
+
+    const gMatrix = svgMatrix.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const maxVal = d3.max(matrixData, d => d.value) || 1;
+    const colorMatrix = d3.scaleSequential(d3.interpolateYlOrRd)
+        .domain([0, maxVal]); // light yellow low, red high
+
+    // Cells
+    gMatrix.selectAll("rect")
+        .data(matrixData)
+        .join("rect")
+        .attr("x", d => d.col * cellSize)
+        .attr("y", d => d.row * cellSize)
+        .attr("width", cellSize)
+        .attr("height", cellSize)
+        .attr("fill", d => d.value ? colorMatrix(d.value) : "#f5f5f5")
+        .attr("stroke", "#e0e0e0")
+        .on("mouseover", function(event, d) {
+            d3.select(this).attr("stroke", "#333").attr("stroke-width", 1.5);
+            tooltip.transition().duration(150).style("opacity", 0.95);
+            tooltip.html(`
+                <strong>Assister:</strong> ${d.assister}<br/>
+                <strong>Shooter:</strong> ${d.shooter}<br/>
+                <strong>Assisted makes:</strong> ${d.value}
+            `)
+            .style("left", (event.pageX + 15) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function() {
+            d3.select(this).attr("stroke", "#e0e0e0").attr("stroke-width", 1);
+            tooltip.transition().duration(300).style("opacity", 0);
+        });
+
+    // Column labels (assisters) on top
+    svgMatrix.append("g")
+        .attr("transform", `translate(${margin.left},${margin.top - 5})`)
+        .selectAll("text")
+        .data(players)
+        .join("text")
+        .attr("transform", (_, i) => `translate(${i * cellSize + cellSize / 2},0) rotate(-60)`)
+        .attr("text-anchor", "start")
+        .style("font-size", "10px")
+        .text(d => d);
+
+    // Row labels (shooters) on left
+    svgMatrix.append("g")
+        .attr("transform", `translate(${margin.left - 10},${margin.top})`)
+        .selectAll("text")
+        .data(players)
+        .join("text")
+        .attr("x", 0)
+        .attr("y", (_, i) => i * cellSize + cellSize / 2)
+        .attr("dy", "0.32em")
+        .attr("text-anchor", "end")
+        .style("font-size", "10px")
+        .text(d => d);
+
+    // Axis titles
+    svgMatrix.append("text")
+        .attr("x", margin.left + (n * cellSize) / 2)
+        .attr("y", margin.top - 80) // a bit above column names
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Assister (x-axis)");
+
+    svgMatrix.append("text")
+        .attr("x", margin.left - 100) // closer to row names / grid
+        .attr("y", margin.top + (n * cellSize) / 2)
+        .attr("text-anchor", "middle")
+        .attr("transform", `rotate(-90, ${margin.left - 100}, ${margin.top + (n * cellSize) / 2})`)
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Shooter (y-axis)");
+
+}).catch(function(error) {
+    console.error("Error loading the JSON data: ", error);
+    d3.select("body").append("h2")
+      .style("color", "red")
+      .style("text-align", "center")
+      .style("margin-top", "20%")
+      .style("font-family", "Arial, sans-serif")
+      .text("Failed to load assist_network.json. Make sure your Python server is running!");
+});
+
+/* Shot heatmap code kept for reference, but disabled.
+// --- Shot heatmap on a basketball court ---
+
+d3.json("shot_heatmap.json").then(function(heatmap) {
+    ...
+}).catch(function(error) {
+    console.error("Error loading the shot heatmap data: ", error);
+});
+*/
+</script>
+</body>
+</html>

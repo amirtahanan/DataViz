@@ -1,0 +1,434 @@
+{
+    "nodes": [
+        {
+            "id": "Max Christie",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Tyus Jones",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Dereck Lively II",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Dwight Powell",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "AJ Johnson",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Ryan Nembhard",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Brandon Williams",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Kyrie Irving",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Naji Marshall",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Miles Kelly",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Caleb Martin",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Khris Middleton",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Daniel Gafford",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "P.J. Washington",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Moussa Cisse",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Klay Thompson",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Cooper Flagg",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        },
+        {
+            "id": "Marvin Bagley III",
+            "group": 3,
+            "team": "DAL",
+            "ppg": 0
+        }
+    ],
+    "links": [
+        {
+            "source": "Max Christie",
+            "target": "Flagg, Cooper",
+            "value": 25
+        },
+        {
+            "source": "Max Christie",
+            "target": "Williams, Brandon",
+            "value": 11
+        },
+        {
+            "source": "Max Christie",
+            "target": "Marshall, Naji",
+            "value": 16
+        },
+        {
+            "source": "Max Christie",
+            "target": "Gafford, Daniel",
+            "value": 9
+        },
+        {
+            "source": "Max Christie",
+            "target": "Washington, P.J.",
+            "value": 13
+        },
+        {
+            "source": "Max Christie",
+            "target": "Russell, D'Angelo",
+            "value": 9
+        },
+        {
+            "source": "Max Christie",
+            "target": "Davis, Anthony",
+            "value": 6
+        },
+        {
+            "source": "Max Christie",
+            "target": "Thompson, Klay",
+            "value": 12
+        },
+        {
+            "source": "Tyus Jones",
+            "target": "Bagley III, Marvin",
+            "value": 6
+        },
+        {
+            "source": "Dwight Powell",
+            "target": "Flagg, Cooper",
+            "value": 9
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Flagg, Cooper",
+            "value": 37
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Christie, Max",
+            "value": 17
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Hardy, Jaden",
+            "value": 7
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Marshall, Naji",
+            "value": 23
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Gafford, Daniel",
+            "value": 12
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Washington, P.J.",
+            "value": 19
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Davis, Anthony",
+            "value": 21
+        },
+        {
+            "source": "Ryan Nembhard",
+            "target": "Thompson, Klay",
+            "value": 29
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Flagg, Cooper",
+            "value": 18
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Christie, Max",
+            "value": 23
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Hardy, Jaden",
+            "value": 8
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Marshall, Naji",
+            "value": 28
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Gafford, Daniel",
+            "value": 9
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Washington, P.J.",
+            "value": 25
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Martin, Caleb",
+            "value": 8
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Powell, Dwight",
+            "value": 6
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Davis, Anthony",
+            "value": 13
+        },
+        {
+            "source": "Brandon Williams",
+            "target": "Thompson, Klay",
+            "value": 28
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Nembhard, Ryan",
+            "value": 7
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Flagg, Cooper",
+            "value": 25
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Christie, Max",
+            "value": 19
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Williams, Brandon",
+            "value": 8
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Gafford, Daniel",
+            "value": 8
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Washington, P.J.",
+            "value": 17
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Russell, D'Angelo",
+            "value": 8
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Powell, Dwight",
+            "value": 9
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Davis, Anthony",
+            "value": 17
+        },
+        {
+            "source": "Naji Marshall",
+            "target": "Thompson, Klay",
+            "value": 26
+        },
+        {
+            "source": "Caleb Martin",
+            "target": "Flagg, Cooper",
+            "value": 11
+        },
+        {
+            "source": "Caleb Martin",
+            "target": "Christie, Max",
+            "value": 8
+        },
+        {
+            "source": "Caleb Martin",
+            "target": "Williams, Brandon",
+            "value": 6
+        },
+        {
+            "source": "Caleb Martin",
+            "target": "Marshall, Naji",
+            "value": 12
+        },
+        {
+            "source": "Caleb Martin",
+            "target": "Washington, P.J.",
+            "value": 7
+        },
+        {
+            "source": "Caleb Martin",
+            "target": "Thompson, Klay",
+            "value": 12
+        },
+        {
+            "source": "Daniel Gafford",
+            "target": "Christie, Max",
+            "value": 8
+        },
+        {
+            "source": "Daniel Gafford",
+            "target": "Thompson, Klay",
+            "value": 13
+        },
+        {
+            "source": "P.J. Washington",
+            "target": "Christie, Max",
+            "value": 18
+        },
+        {
+            "source": "P.J. Washington",
+            "target": "Williams, Brandon",
+            "value": 11
+        },
+        {
+            "source": "P.J. Washington",
+            "target": "Marshall, Naji",
+            "value": 14
+        },
+        {
+            "source": "P.J. Washington",
+            "target": "Gafford, Daniel",
+            "value": 7
+        },
+        {
+            "source": "P.J. Washington",
+            "target": "Thompson, Klay",
+            "value": 8
+        },
+        {
+            "source": "Klay Thompson",
+            "target": "Cisse, Moussa",
+            "value": 7
+        },
+        {
+            "source": "Klay Thompson",
+            "target": "Williams, Brandon",
+            "value": 8
+        },
+        {
+            "source": "Klay Thompson",
+            "target": "Marshall, Naji",
+            "value": 10
+        },
+        {
+            "source": "Klay Thompson",
+            "target": "Washington, P.J.",
+            "value": 10
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Nembhard, Ryan",
+            "value": 14
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Christie, Max",
+            "value": 39
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Williams, Brandon",
+            "value": 20
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Marshall, Naji",
+            "value": 33
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Gafford, Daniel",
+            "value": 11
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Washington, P.J.",
+            "value": 17
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Martin, Caleb",
+            "value": 9
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Davis, Anthony",
+            "value": 23
+        },
+        {
+            "source": "Cooper Flagg",
+            "target": "Thompson, Klay",
+            "value": 20
+        }
+    ]
+}
