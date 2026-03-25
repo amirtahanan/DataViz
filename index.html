@@ -3,329 +3,1846 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basketball Assist Network</title>
+    <title>NBA Assist Intelligence Board</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-1: #f5f7fb;
+            --bg-2: #e9edf5;
+            --ink: #1d2532;
+            --ink-soft: #4e5b70;
+            --panel: #ffffff;
+            --panel-border: #d8dfeb;
+            --accent: #2f6df5;
+            --accent-soft: #dce8ff;
+            --button: #323f52;
+            --button-hover: #1f2a3c;
+            --heat-low: #fff7d6;
+            --heat-high: #bd1e1e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            overflow-y: auto;
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
+            min-height: 100vh;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 90% 5%, #cbd6ed 0, transparent 35%),
+                radial-gradient(circle at 10% 85%, #dce5f6 0, transparent 42%),
+                linear-gradient(160deg, var(--bg-1), var(--bg-2));
+            font-family: "Manrope", sans-serif;
         }
-        svg {
-            width: 100vw;
-            height: 100vh;
+
+        .page {
+            width: min(1320px, 95vw);
+            margin: 24px auto 40px;
+        }
+
+        .title {
+            font-family: "Barlow Condensed", sans-serif;
+            letter-spacing: 0.04em;
+            font-size: clamp(30px, 3.2vw, 46px);
+            margin: 0;
+            text-align: center;
+            color: #2b3345;
+        }
+
+        .subtitle {
+            margin: 6px 0 22px;
+            text-align: center;
+            color: var(--ink-soft);
+            font-size: 14px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+            gap: 14px;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .section-tab {
+            border: 1px solid #cfd8e8;
+            background: #f6f9ff;
+            color: #31425f;
+            border-radius: 999px;
+            padding: 9px 14px;
+            font-family: "Manrope", sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .section-tab.is-active {
+            background: linear-gradient(180deg, #3f79f0 0%, #2f6df5 100%);
+            border-color: #2f6df5;
+            color: #ffffff;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.is-active {
             display: block;
         }
-        .links line {
-            stroke: #999;
-            stroke-opacity: 0.6;
-        }
-        .nodes circle {
-            stroke: #fff;
-            stroke-width: 1.5px;
-            cursor: pointer;
-        }
-        .labels text {
-            font-size: 14px;
-            pointer-events: none;
-            font-family: Arial, sans-serif;
-            text-shadow: 
-                -1px -1px 0 #fff,  
-                 1px -1px 0 #fff,
-                -1px  1px 0 #fff,
-                 1px  1px 0 #fff;
-        }
-        #tooltip {
-            position: absolute;
-            text-align: left;
-            padding: 10px;
-            font: 14px sans-serif;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #ccc;
+
+        .viz-toggle {
+            display: flex;
+            gap: 0;
+            border: 1px solid #cfd8e8;
             border-radius: 6px;
-            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .viz-toggle-btn {
+            border: none;
+            background: #f6f9ff;
+            color: #5c6f91;
+            padding: 6px 14px;
+            font-family: "Manrope", sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .viz-toggle-btn:not(:last-child) {
+            border-right: 1px solid #cfd8e8;
+        }
+
+        .viz-toggle-btn:hover {
+            background: #edf2fb;
+        }
+
+        .viz-toggle-btn.is-active {
+            background: linear-gradient(180deg, #3f79f0 0%, #2f6df5 100%);
+            color: #ffffff;
+        }
+
+        #chord-diagram {
+            min-height: 520px;
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        #chord-wrapper {
+            padding: 10px 0;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(36, 55, 89, 0.08);
+            overflow: hidden;
+        }
+
+        .panel-head {
+            border-bottom: 1px solid var(--panel-border);
+            background: linear-gradient(180deg, #f9fbff 0%, #f4f7fd 100%);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-head h2,
+        .panel-head h3 {
+            margin: 0;
+            font-family: "Barlow Condensed", sans-serif;
+            letter-spacing: 0.02em;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .chip {
+            background: var(--accent-soft);
+            color: #1e4db1;
+            border: 1px solid #b9cdfd;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .controls {
+            padding: 16px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #2f3a4f;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .field select {
+            width: 100%;
+            border: 1px solid #c8d1e0;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1f2735;
+            font-family: "Manrope", sans-serif;
+            font-size: 14px;
+            padding: 10px 12px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(47, 109, 245, 0.15);
+        }
+
+        .btn {
+            width: 100%;
+            border: 0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: #ffffff;
+            font-family: "Manrope", sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            cursor: pointer;
+            background: linear-gradient(180deg, #45536a 0%, var(--button) 100%);
+            transition: transform 0.12s ease, background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: linear-gradient(180deg, #2a3547 0%, var(--button-hover) 100%);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        #network-wrapper {
+            padding: 8px;
+        }
+
+        #network {
+            width: 100%;
+            height: 540px;
+            display: block;
+            border-radius: 10px;
+            background:
+                radial-gradient(circle at 30% 20%, #fbfdff 0%, #f2f6ff 100%);
+        }
+
+        .heatmap-panel {
+            margin-top: 14px;
+        }
+
+        .assist-heatmap-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            justify-content: center;
+            align-items: stretch;
+            gap: 12px;
+            padding: 12px;
+            min-height: 620px;
+        }
+
+        #matrix-scroll {
+            overflow: auto;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0;
+        }
+
+        #assist-matrix {
+            min-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        #assist-matrix svg {
+            display: block;
+            background: #ffffff;
+            border-radius: 8px;
+        }
+
+        #assist-insights {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-self: stretch;
+            justify-content: center;
+            margin-top: 0;
+        }
+
+        #assist-insights .stat-card {
+            min-height: 104px;
+        }
+
+        .analytics-grid {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .analytics-grid .panel {
+            min-height: 260px;
+        }
+
+        .viz-body {
+            padding: 8px;
+        }
+
+        .viz-body svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .shot-analytics {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            grid-column: 1 / -1;
+        }
+
+        .shot-top-bar {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .shot-top-bar .controls {
+            padding: 0;
+            border-bottom: none;
+        }
+
+        #shot-stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            flex: 1;
+            align-items: flex-start;
+        }
+
+        #shot-stats .stat-card {
+            min-width: 120px;
+            flex: 0 0 auto;
+        }
+
+        #shot-density-chart {
+            min-height: 620px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: linear-gradient(180deg, #f9fbff 0%, #f4f7fd 100%);
+            border: 1px solid #d8dfeb;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 12px;
+        }
+
+        .stat-label {
+            color: #6f7f9b;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .stat-sub {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #5c6b85;
+            line-height: 1.4;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1d2532;
+            font-family: "Barlow Condensed", sans-serif;
+        }
+
+        .zone-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .zone-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .zone-label {
+            width: 70px;
+            color: #4e5b70;
+            font-weight: 500;
+        }
+
+        .zone-bar-bg {
+            flex: 1;
+            height: 6px;
+            background: #e9edf5;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .zone-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2f6df5, #1e4db1);
+            border-radius: 3px;
+            transition: width 0.2s ease;
+        }
+
+        .zone-pct {
+            width: 35px;
+            text-align: right;
+            color: #1d2532;
+            font-weight: 600;
+        }
+
+        #shot-density-chart svg {
+            background: linear-gradient(180deg, #fcfdff, #f6f8fd);
+        }
+
+        #tooltip {
+            position: fixed;
+            z-index: 20;
             opacity: 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: opacity 0.2s;
+            pointer-events: none;
+            min-width: 170px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(21, 27, 38, 0.95);
+            color: #f2f5fc;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
+            font-size: 12px;
+            line-height: 1.5;
+            transition: opacity 0.15s ease;
+        }
+
+        #status {
+            margin: 12px 0 0;
+            font-size: 13px;
+            color: #4f607f;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 36px 14px;
+            color: #6f7f9b;
+            font-weight: 600;
+        }
+
+        @media (max-width: 980px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .section-tabs {
+                flex-wrap: wrap;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .assist-heatmap-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .shot-top-bar {
+                flex-direction: column;
+            }
+
+            #network {
+                height: 460px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(1320px, 97vw);
+                margin-top: 12px;
+            }
+
+            .panel-head h2,
+            .panel-head h3 {
+                font-size: 22px;
+            }
+
+            #network {
+                height: 410px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="page">
+        <h1 class="title">Proposed Visualization Interface</h1>
+        <p class="subtitle">Interactive assist network and assist heatmap for NBA lineup chemistry.</p>
 
-<div id="tooltip"></div>
-<svg id="network"></svg>
-<div id="assist-matrix"></div>
-<!-- <svg id="shot-heatmap"></svg> -->
+        <div class="layout">
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Filters</h3>
+                </div>
+                <div class="controls">
+                    <div class="field">
+                        <label for="team-select">Select Team</label>
+                        <select id="team-select"></select>
+                    </div>
 
-<script>
-d3.json("assist_network.json").then(function(data) {
-    
-    if (!data.nodes || !data.links) {
-        console.error("Data format incorrect. Expected an object with 'nodes' and 'links' arrays.");
-        return;
-    }
+                    <button id="apply-btn" class="btn">Apply Filters</button>
+                    <p id="status"></p>
+                </div>
+            </section>
 
-    // Clean up the API's name formatting so 'source'/'target' exactly match node 'id'
-    const nodeIds = new Set(data.nodes.map(d => d.id));
+            <section class="panel">
+                <div class="panel-head">
+                    <h2>Assist Visualization</h2>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="viz-toggle" role="tablist">
+                            <button class="viz-toggle-btn is-active" data-viz="network" type="button">Network</button>
+                            <button class="viz-toggle-btn" data-viz="chord" type="button">Chord</button>
+                        </div>
+                        <div id="network-chip" class="chip">0 players • 0 links</div>
+                    </div>
+                </div>
+                <div id="network-wrapper">
+                    <svg id="network"></svg>
+                </div>
+                <div id="chord-wrapper" style="display: none;">
+                    <div id="chord-diagram"></div>
+                </div>
+            </section>
+        </div>
 
-    data.links = data.links
-        .map(link => {
-            ['source', 'target'].forEach(key => {
-                if (typeof link[key] === 'string' && link[key].includes(',')) {
-                    const parts = link[key].split(', ');
-                    // Converts "Flagg, Cooper" into "Cooper Flagg"
-                    link[key] = parts[1] + ' ' + parts[0];
+        <div class="section-tabs" role="tablist" aria-label="Visualization Sections">
+            <button class="section-tab is-active" data-tab="assists" type="button">Assist Views</button>
+            <button class="section-tab" data-tab="shots" type="button">Shot Views</button>
+        </div>
+
+        <div id="tab-assists" class="tab-panel is-active">
+            <section class="panel heatmap-panel">
+                <div class="panel-head">
+                    <h2>Assist Heatmap</h2>
+                    <div id="matrix-chip" class="chip">0 x 0 matrix</div>
+                </div>
+                <div class="assist-heatmap-layout">
+                    <div id="matrix-scroll">
+                        <div id="assist-matrix"></div>
+                    </div>
+                    <div id="assist-insights"></div>
+                </div>
+            </section>
+
+            <section class="analytics-grid">
+                <section class="panel">
+                    <div class="panel-head">
+                        <h2>Top Playmakers</h2>
+                        <div id="passers-chip" class="chip">Top 8 by assists</div>
+                    </div>
+                    <div class="viz-body">
+                        <div id="top-passers"></div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-head">
+                        <h2>Top Targets</h2>
+                        <div id="targets-chip" class="chip">Top 8 receiving</div>
+                    </div>
+                    <div class="viz-body">
+                        <div id="top-targets"></div>
+                    </div>
+                </section>
+            </section>
+        </div>
+
+        <div id="tab-shots" class="tab-panel">
+            <section class="panel heatmap-panel">
+                <div class="panel-head">
+                    <h2>Team Shot Density</h2>
+                    <div id="shot-chip" class="chip">Made shot bins</div>
+                </div>
+                <div class="viz-body">
+                    <div class="shot-analytics">
+                        <div class="shot-top-bar">
+                            <div class="controls">
+                                <div class="field">
+                                    <label for="shot-player-select">Player</label>
+                                    <select id="shot-player-select">
+                                        <option value="team">All Players (Team)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="shot-stats"></div>
+                        </div>
+                        <div id="shot-density-chart"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="tooltip"></div>
+
+    <script>
+        const tooltip = d3.select("#tooltip");
+        const teamSelect = document.getElementById("team-select");
+        const applyBtn = document.getElementById("apply-btn");
+        const shotPlayerSelect = document.getElementById("shot-player-select");
+        const statusEl = document.getElementById("status");
+        const networkChip = document.getElementById("network-chip");
+        const matrixChip = document.getElementById("matrix-chip");
+        const passersChip = document.getElementById("passers-chip");
+        const targetsChip = document.getElementById("targets-chip");
+        const shotChip = document.getElementById("shot-chip");
+        const sectionTabs = document.querySelectorAll(".section-tab");
+        const sectionPanels = document.querySelectorAll(".tab-panel");
+
+        const topPassersMount = d3.select("#top-passers");
+        const topTargetsMount = d3.select("#top-targets");
+        const shotDensityMount = d3.select("#shot-density-chart");
+        const shotStatsMount = d3.select("#shot-stats");
+        const assistInsightsMount = d3.select("#assist-insights");
+        const chordDiagramMount = d3.select("#chord-diagram");
+        const networkWrapper = document.getElementById("network-wrapper");
+        const chordWrapper = document.getElementById("chord-wrapper");
+        const vizToggleBtns = document.querySelectorAll(".viz-toggle-btn");
+
+        let allAssistByTeam = {};
+        let allShotsByTeam = {};
+        let teamMeta = [];
+        let currentGraph = { nodes: [], links: [] };
+        let shotHeatmap = [];
+        let currentShotPlayer = "team";
+        let activeSectionTab = "assists";
+        let activeViz = "network";
+
+        function setActiveViz(vizName) {
+            activeViz = vizName;
+            vizToggleBtns.forEach(btn => {
+                btn.classList.toggle("is-active", btn.dataset.viz === vizName);
+            });
+            networkWrapper.style.display = vizName === "network" ? "block" : "none";
+            chordWrapper.style.display = vizName === "chord" ? "block" : "none";
+            
+            if (vizName === "chord") {
+                renderChordDiagram();
+            }
+        }
+
+        function setActiveSectionTab(tabName) {
+            activeSectionTab = tabName;
+            sectionTabs.forEach(button => {
+                button.classList.toggle("is-active", button.dataset.tab === tabName);
+            });
+            sectionPanels.forEach(panel => {
+                panel.classList.toggle("is-active", panel.id === `tab-${tabName}`);
+            });
+
+            if (tabName === "assists") {
+                renderMatrix(currentGraph);
+                renderAssistInsights(currentGraph);
+                renderTopContributors(currentGraph);
+            } else if (tabName === "shots") {
+                renderShotDensity();
+            }
+        }
+
+        function normalizeName(name) {
+            if (typeof name !== "string") {
+                return name;
+            }
+            if (!name.includes(",")) {
+                return name.trim();
+            }
+            const parts = name.split(",").map(p => p.trim()).filter(Boolean);
+            if (parts.length !== 2) {
+                return name.trim();
+            }
+            return `${parts[1]} ${parts[0]}`;
+        }
+
+        function fillSelect(selectEl, options, defaultValue) {
+            selectEl.innerHTML = "";
+            options.forEach(option => {
+                const node = document.createElement("option");
+                node.value = option.value;
+                node.textContent = option.label;
+                if (option.value === defaultValue) {
+                    node.selected = true;
+                }
+                selectEl.appendChild(node);
+            });
+        }
+
+        function getNodeDegrees(links) {
+            const totals = new Map();
+            links.forEach(l => {
+                const s = typeof l.source === "string" ? l.source : l.source.id;
+                const t = typeof l.target === "string" ? l.target : l.target.id;
+                const v = Number(l.value) || 0;
+                totals.set(s, (totals.get(s) || 0) + v);
+                totals.set(t, (totals.get(t) || 0) + v);
+            });
+            return totals;
+        }
+
+        function buildFilteredGraph() {
+            const team = teamSelect.value;
+
+            const teamData = allAssistByTeam[team] || { nodes: [], links: [] };
+            const nodes = (teamData.nodes || []).map(n => ({ ...n }));
+            const links = (teamData.links || []).map(l => ({ ...l }));
+
+            return { nodes, links };
+        }
+
+        function renderNetwork(graph) {
+            const svg = d3.select("#network");
+            svg.selectAll("*").remove();
+
+            const width = svg.node().clientWidth;
+            const height = svg.node().clientHeight;
+            svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+            if (graph.nodes.length === 0) {
+                svg.append("text")
+                    .attr("x", width / 2)
+                    .attr("y", height / 2)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "#66789b")
+                    .attr("font-size", 18)
+                    .attr("font-weight", 700)
+                    .text("No players match this filter set");
+                return;
+            }
+
+            svg.append("defs").append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 20)
+                .attr("refY", 0)
+                .attr("markerWidth", 5)
+                .attr("markerHeight", 5)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#6e7f9c");
+
+            const degree = getNodeDegrees(graph.links);
+            const maxDegree = d3.max([...degree.values()]) || 1;
+            const radius = d3.scaleSqrt().domain([0, maxDegree]).range([11, 26]);
+            const linkStroke = d3.scaleLinear().domain([0, d3.max(graph.links, d => Number(d.value) || 1) || 1]).range([1, 5]);
+
+            const simulation = d3.forceSimulation(graph.nodes)
+                .force("link", d3.forceLink(graph.links).id(d => d.id).distance(180).strength(0.18))
+                .force("charge", d3.forceManyBody().strength(-420))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collide", d3.forceCollide().radius(d => radius(degree.get(d.id) || 0) + 30));
+
+            const gLinks = svg.append("g").attr("opacity", 0.86);
+            const gNodes = svg.append("g");
+            const gLabels = svg.append("g");
+
+            const links = gLinks.selectAll("line")
+                .data(graph.links)
+                .join("line")
+                .attr("stroke", "#6b788f")
+                .attr("stroke-opacity", 0.6)
+                .attr("stroke-width", d => linkStroke(Number(d.value) || 1))
+                .attr("marker-end", "url(#arrow)")
+                .on("mousemove", (event, d) => {
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>${d.source.id || d.source} -> ${d.target.id || d.target}</strong><br/>Assists: ${d.value}`)
+                        .style("left", `${event.clientX + 14}px`)
+                        .style("top", `${event.clientY - 18}px`);
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+
+            const nodes = gNodes.selectAll("circle")
+                .data(graph.nodes)
+                .join("circle")
+                .attr("r", d => radius(degree.get(d.id) || 0))
+                .attr("fill", "#d8deea")
+                .attr("stroke", "#7f8fa8")
+                .attr("stroke-width", 1.6)
+                .call(
+                    d3.drag()
+                        .on("start", (event, d) => {
+                            if (!event.active) simulation.alphaTarget(0.25).restart();
+                            d.fx = d.x;
+                            d.fy = d.y;
+                        })
+                        .on("drag", (event, d) => {
+                            d.fx = event.x;
+                            d.fy = event.y;
+                        })
+                        .on("end", (event, d) => {
+                            if (!event.active) simulation.alphaTarget(0);
+                            d.fx = null;
+                            d.fy = null;
+                        })
+                )
+                .on("mousemove", (event, d) => {
+                    const usage = degree.get(d.id) || 0;
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>${d.id}</strong><br/>Team: ${d.team || "N/A"}<br/>Position: ${d.position || "Unknown"}<br/>Assist volume: ${usage}`)
+                        .style("left", `${event.clientX + 14}px`)
+                        .style("top", `${event.clientY - 18}px`);
+
+                    links
+                        .attr("stroke", l => {
+                            const source = typeof l.source === "string" ? l.source : l.source.id;
+                            const target = typeof l.target === "string" ? l.target : l.target.id;
+                            if (source === d.id) {
+                                return "#d86e11";
+                            }
+                            if (target === d.id) {
+                                return "#2f6df5";
+                            }
+                            return "#c5cfdf";
+                        })
+                        .attr("stroke-opacity", l => {
+                            const source = typeof l.source === "string" ? l.source : l.source.id;
+                            const target = typeof l.target === "string" ? l.target : l.target.id;
+                            return (source === d.id || target === d.id) ? 0.95 : 0.14;
+                        })
+                        .attr("stroke-width", l => {
+                            const base = linkStroke(Number(l.value) || 1);
+                            const source = typeof l.source === "string" ? l.source : l.source.id;
+                            const target = typeof l.target === "string" ? l.target : l.target.id;
+                            return (source === d.id || target === d.id) ? base * 1.55 : base * 0.75;
+                        });
+
+                    nodes
+                        .attr("fill", n => {
+                            if (n.id === d.id) {
+                                return "#f7cf35";
+                            }
+                            const connected = graph.links.some(l => {
+                                const source = typeof l.source === "string" ? l.source : l.source.id;
+                                const target = typeof l.target === "string" ? l.target : l.target.id;
+                                return (source === d.id && target === n.id) || (target === d.id && source === n.id);
+                            });
+                            return connected ? "#cfdcf6" : "#edf1f8";
+                        })
+                        .attr("stroke", n => {
+                            if (n.id === d.id) {
+                                return "#9a7a0a";
+                            }
+                            const connected = graph.links.some(l => {
+                                const source = typeof l.source === "string" ? l.source : l.source.id;
+                                const target = typeof l.target === "string" ? l.target : l.target.id;
+                                return (source === d.id && target === n.id) || (target === d.id && source === n.id);
+                            });
+                            return connected ? "#6f88b9" : "#ced7e6";
+                        })
+                        .attr("opacity", n => {
+                            if (n.id === d.id) {
+                                return 1;
+                            }
+                            const connected = graph.links.some(l => {
+                                const source = typeof l.source === "string" ? l.source : l.source.id;
+                                const target = typeof l.target === "string" ? l.target : l.target.id;
+                                return (source === d.id && target === n.id) || (target === d.id && source === n.id);
+                            });
+                            return connected ? 1 : 0.35;
+                        });
+
+                    labels
+                        .attr("opacity", n => {
+                            if (n.id === d.id) {
+                                return 1;
+                            }
+                            const connected = graph.links.some(l => {
+                                const source = typeof l.source === "string" ? l.source : l.source.id;
+                                const target = typeof l.target === "string" ? l.target : l.target.id;
+                                return (source === d.id && target === n.id) || (target === d.id && source === n.id);
+                            });
+                            return connected ? 1 : 0.3;
+                        });
+                })
+                .on("mouseout", () => {
+                    tooltip.style("opacity", 0);
+                    links
+                        .attr("stroke", "#6b788f")
+                        .attr("stroke-opacity", 0.6)
+                        .attr("stroke-width", d => linkStroke(Number(d.value) || 1));
+                    nodes
+                        .attr("fill", "#d8deea")
+                        .attr("stroke", "#7f8fa8")
+                        .attr("opacity", 1);
+                    labels.attr("opacity", 1);
+                });
+
+            const labels = gLabels.selectAll("text")
+                .data(graph.nodes)
+                .join("text")
+                .text(d => d.id)
+                .attr("font-size", 12)
+                .attr("font-weight", 700)
+                .attr("fill", "#2b3446")
+                .attr("paint-order", "stroke")
+                .attr("stroke", "#ffffff")
+                .attr("stroke-width", 3)
+                .attr("stroke-linejoin", "round")
+                .attr("pointer-events", "none");
+
+            simulation.on("tick", () => {
+                links
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                nodes
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+
+                labels
+                    .attr("x", d => d.x + 14)
+                    .attr("y", d => d.y + 4);
+            });
+        }
+
+        function renderMatrix(graph) {
+            const mount = d3.select("#assist-matrix");
+            mount.selectAll("*").remove();
+
+            if (graph.nodes.length === 0) {
+                mount.append("div")
+                    .attr("class", "empty")
+                    .text("No matrix to display with the current filters.");
+                matrixChip.textContent = "0 x 0 matrix";
+                return;
+            }
+
+            const totals = getNodeDegrees(graph.links);
+            const players = graph.nodes
+                .slice()
+                .sort((a, b) => (totals.get(b.id) || 0) - (totals.get(a.id) || 0))
+                .map(n => n.id);
+
+            const n = players.length;
+            const valueByPair = new Map();
+            graph.links.forEach(l => {
+                const source = typeof l.source === "string" ? l.source : l.source.id;
+                const target = typeof l.target === "string" ? l.target : l.target.id;
+                const key = `${source}||${target}`;
+                valueByPair.set(key, (valueByPair.get(key) || 0) + (Number(l.value) || 0));
+            });
+
+            const matrix = [];
+            players.forEach((shooter, row) => {
+                players.forEach((assister, col) => {
+                    const key = `${assister}||${shooter}`;
+                    matrix.push({ row, col, assister, shooter, value: valueByPair.get(key) || 0 });
+                });
+            });
+
+            const maxVal = d3.max(matrix, d => d.value) || 1;
+            const cell = Math.max(16, Math.min(36, Math.floor(760 / Math.max(1, n))));
+            const margin = { top: 146, right: 24, bottom: 24, left: 146 };
+            const width = margin.left + margin.right + n * cell;
+            const height = margin.top + margin.bottom + n * cell;
+
+            const svg = mount.append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            const grid = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const color = d3.scaleLinear()
+                .domain([0, maxVal])
+                .range(["#f4f4ef", "#cb2027"]);
+
+            grid.selectAll("rect")
+                .data(matrix)
+                .join("rect")
+                .attr("x", d => d.col * cell)
+                .attr("y", d => d.row * cell)
+                .attr("width", cell)
+                .attr("height", cell)
+                .attr("fill", d => color(d.value))
+                .attr("stroke", "#d8dce6")
+                .on("mousemove", (event, d) => {
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>Assister:</strong> ${d.assister}<br/><strong>Shooter:</strong> ${d.shooter}<br/><strong>Assists:</strong> ${d.value}`)
+                        .style("left", `${event.clientX + 14}px`)
+                        .style("top", `${event.clientY - 18}px`);
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top - 10})`)
+                .selectAll("text")
+                .data(players)
+                .join("text")
+                .attr("transform", (_, i) => `translate(${i * cell + cell / 2}, 0) rotate(-55)`)
+                .attr("text-anchor", "start")
+                .attr("font-size", 11)
+                .attr("font-weight", 600)
+                .attr("fill", "#2f3a4d")
+                .text(d => d);
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left - 10},${margin.top})`)
+                .selectAll("text")
+                .data(players)
+                .join("text")
+                .attr("x", 0)
+                .attr("y", (_, i) => i * cell + cell / 2)
+                .attr("dy", "0.35em")
+                .attr("text-anchor", "end")
+                .attr("font-size", 11)
+                .attr("font-weight", 600)
+                .attr("fill", "#2f3a4d")
+                .text(d => d);
+
+            matrixChip.textContent = `${n} x ${n} matrix`;
+        }
+
+        function flowTotals(graph) {
+            const outgoing = new Map();
+            const incoming = new Map();
+
+            graph.links.forEach(l => {
+                const source = typeof l.source === "string" ? l.source : l.source.id;
+                const target = typeof l.target === "string" ? l.target : l.target.id;
+                const value = Number(l.value) || 0;
+                outgoing.set(source, (outgoing.get(source) || 0) + value);
+                incoming.set(target, (incoming.get(target) || 0) + value);
+            });
+
+            return { outgoing, incoming };
+        }
+
+        function renderRankingChart(mount, data, emptyMessage, colorStart, colorEnd) {
+            mount.selectAll("*").remove();
+
+            if (data.length === 0) {
+                mount.append("div")
+                    .attr("class", "empty")
+                    .text(emptyMessage);
+                return;
+            }
+
+            const width = 620;
+            const rowHeight = 34;
+            const margin = { top: 20, right: 30, bottom: 22, left: 220 };
+            const height = margin.top + margin.bottom + rowHeight * data.length;
+
+            const svg = mount.append("svg")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("preserveAspectRatio", "xMinYMin meet");
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.value) || 1])
+                .range([margin.left, width - margin.right]);
+
+            const y = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([margin.top, height - margin.bottom])
+                .padding(0.28);
+
+            const defs = svg.append("defs");
+            const gradId = `grad-${Math.random().toString(36).slice(2)}`;
+            const grad = defs.append("linearGradient")
+                .attr("id", gradId)
+                .attr("x1", "0%")
+                .attr("x2", "100%")
+                .attr("y1", "0%")
+                .attr("y2", "0%");
+
+            grad.append("stop").attr("offset", "0%").attr("stop-color", colorStart);
+            grad.append("stop").attr("offset", "100%").attr("stop-color", colorEnd);
+
+            svg.append("g")
+                .selectAll("rect")
+                .data(data)
+                .join("rect")
+                .attr("x", margin.left)
+                .attr("y", d => y(d.name))
+                .attr("width", d => x(d.value) - margin.left)
+                .attr("height", y.bandwidth())
+                .attr("rx", 6)
+                .attr("fill", `url(#${gradId})`)
+                .on("mousemove", (event, d) => {
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>${d.name}</strong><br/>Assists: ${d.value}`)
+                        .style("left", `${event.clientX + 14}px`)
+                        .style("top", `${event.clientY - 18}px`);
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+
+            svg.append("g")
+                .selectAll("text")
+                .data(data)
+                .join("text")
+                .attr("x", margin.left - 10)
+                .attr("y", d => y(d.name) + y.bandwidth() / 2)
+                .attr("dy", "0.35em")
+                .attr("text-anchor", "end")
+                .attr("font-size", 12)
+                .attr("font-weight", 700)
+                .attr("fill", "#324058")
+                .text(d => d.name);
+
+            svg.append("g")
+                .selectAll("text")
+                .data(data)
+                .join("text")
+                .attr("x", d => x(d.value) + 8)
+                .attr("y", d => y(d.name) + y.bandwidth() / 2)
+                .attr("dy", "0.35em")
+                .attr("font-size", 12)
+                .attr("font-weight", 700)
+                .attr("fill", "#2c374b")
+                .text(d => d.value);
+        }
+
+        function renderTopContributors(graph) {
+            const { outgoing, incoming } = flowTotals(graph);
+
+            const passers = [...outgoing.entries()]
+                .map(([name, value]) => ({ name, value }))
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 8);
+
+            const targets = [...incoming.entries()]
+                .map(([name, value]) => ({ name, value }))
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 8);
+
+            passersChip.textContent = `Top ${passers.length} by assists made`;
+            targetsChip.textContent = `Top ${targets.length} by assists received`;
+
+            renderRankingChart(
+                topPassersMount,
+                passers,
+                "No passing totals available with this filter.",
+                "#8fb5ff",
+                "#2a67e6"
+            );
+
+            renderRankingChart(
+                topTargetsMount,
+                targets,
+                "No receiving totals available with this filter.",
+                "#ffd88f",
+                "#d86e11"
+            );
+        }
+
+        function drawCourtLines(group, x, y) {
+            const line = "#4d5f7d";
+
+            function arcPathDataSpace(cx, cy, r, startDeg, endDeg, steps = 64) {
+                const points = [];
+                for (let i = 0; i <= steps; i += 1) {
+                    const t = startDeg + ((endDeg - startDeg) * i) / steps;
+                    const rad = (t * Math.PI) / 180;
+                    points.push([x(cx + r * Math.cos(rad)), y(cy + r * Math.sin(rad))]);
+                }
+                return d3.line()(points);
+            }
+
+            group.append("rect")
+                .attr("x", x(-250))
+                .attr("y", y(422.5))
+                .attr("width", x(250) - x(-250))
+                .attr("height", y(-47.5) - y(422.5))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.8)
+                .attr("opacity", 0.72);
+
+            group.append("rect")
+                .attr("x", x(-80))
+                .attr("y", y(142.5))
+                .attr("width", x(80) - x(-80))
+                .attr("height", y(-47.5) - y(142.5))
+                .attr("fill", "#edf2fb")
+                .attr("opacity", 0.75);
+
+            // Lane space hash marks (at 7, 8, 11, and 14 feet from baseline).
+            [22.5, 32.5, 62.5, 92.5].forEach(mark => {
+                group.append("line")
+                    .attr("x1", x(-90))
+                    .attr("x2", x(-80))
+                    .attr("y1", y(mark))
+                    .attr("y2", y(mark))
+                    .attr("stroke", line)
+                    .attr("stroke-width", 1.2)
+                    .attr("opacity", 0.55);
+
+                group.append("line")
+                    .attr("x1", x(80))
+                    .attr("x2", x(90))
+                    .attr("y1", y(mark))
+                    .attr("y2", y(mark))
+                    .attr("stroke", line)
+                    .attr("stroke-width", 1.2)
+                    .attr("opacity", 0.55);
+            });
+
+            group.append("rect")
+                .attr("x", x(-80))
+                .attr("y", y(142.5))
+                .attr("width", x(80) - x(-80))
+                .attr("height", y(-47.5) - y(142.5))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.5)
+                .attr("opacity", 0.7);
+
+            group.append("path")
+                .attr("d", arcPathDataSpace(0, 142.5, 60, 0, 180))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.4)
+                .attr("opacity", 0.72);
+
+            group.append("path")
+                .attr("d", arcPathDataSpace(0, 142.5, 60, 180, 360))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.1)
+                .attr("stroke-dasharray", "5,5")
+                .attr("opacity", 0.44);
+
+            group.append("circle")
+                .attr("cx", x(0))
+                .attr("cy", y(0))
+                .attr("r", Math.abs(x(7.5) - x(0)))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.5)
+                .attr("opacity", 0.9);
+
+            group.append("line")
+                .attr("x1", x(-30))
+                .attr("x2", x(30))
+                .attr("y1", y(-12.5))
+                .attr("y2", y(-12.5))
+                .attr("stroke", line)
+                .attr("stroke-width", 2.2)
+                .attr("opacity", 0.85);
+
+            group.append("line")
+                .attr("x1", x(-40))
+                .attr("x2", x(40))
+                .attr("y1", y(-47.5))
+                .attr("y2", y(-47.5))
+                .attr("stroke", line)
+                .attr("stroke-width", 1.6)
+                .attr("opacity", 0.52);
+
+            group.append("path")
+                .attr("d", arcPathDataSpace(0, 0, 40, 0, 180))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.3)
+                .attr("opacity", 0.74);
+
+            group.append("line")
+                .attr("x1", x(-220))
+                .attr("x2", x(-220))
+                .attr("y1", y(-47.5))
+                .attr("y2", y(92.5))
+                .attr("stroke", line)
+                .attr("stroke-width", 1.3)
+                .attr("opacity", 0.72);
+
+            group.append("line")
+                .attr("x1", x(220))
+                .attr("x2", x(220))
+                .attr("y1", y(-47.5))
+                .attr("y2", y(92.5))
+                .attr("stroke", line)
+                .attr("stroke-width", 1.3)
+                .attr("opacity", 0.72);
+
+            const cornerAngle = (Math.asin(92.5 / 237.5) * 180) / Math.PI;
+            group.append("path")
+                .attr("d", arcPathDataSpace(0, 0, 237.5, cornerAngle, 180 - cornerAngle))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.5)
+                .attr("opacity", 0.76);
+
+            group.append("line")
+                .attr("x1", x(-250))
+                .attr("x2", x(250))
+                .attr("y1", y(422.5))
+                .attr("y2", y(422.5))
+                .attr("stroke", line)
+                .attr("stroke-width", 1.4)
+                .attr("opacity", 0.56);
+
+            // Center court semicircle (6ft radius = 60 units), arc into visible court
+            group.append("path")
+                .attr("d", arcPathDataSpace(0, 422.5, 60, 180, 360))
+                .attr("fill", "none")
+                .attr("stroke", line)
+                .attr("stroke-width", 1.2)
+                .attr("opacity", 0.5);
+        }
+
+        function createShotCourtTransform(containerWidth) {
+            const margin = { top: 16, right: 20, bottom: 16, left: 20 };
+            const xMin = -250;
+            const xMax = 250;
+            const yMin = -47.5;
+            const yMax = 422.5;
+            const width = Math.max(680, Math.floor(containerWidth || 760));
+            const unit = (width - margin.left - margin.right) / (xMax - xMin);
+            const height = Math.round((yMax - yMin) * unit + margin.top + margin.bottom);
+
+            const x = value => margin.left + (value - xMin) * unit;
+            const y = value => height - margin.bottom - (value - yMin) * unit;
+
+            return { width, height, x, y };
+        }
+
+        function calculateShotStats(shotData) {
+            if (!Array.isArray(shotData) || shotData.length === 0) {
+                return null;
+            }
+
+            const totalShots = shotData.reduce((sum, d) => sum + (Number(d.count) || 0), 0);
+            let paint = 0;
+            let midRange = 0;
+            let threePoint = 0;
+
+            shotData.forEach(d => {
+                const count = Number(d.count) || 0;
+                const sx = Number(d.x) || 0;
+                const sy = Number(d.y) || 0;
+                const dist = Math.sqrt(sx * sx + sy * sy);
+
+                if (dist <= 80) {
+                    paint += count;
+                } else if (dist >= 237.5) {
+                    threePoint += count;
+                } else {
+                    midRange += count;
                 }
             });
-            return link;
-        })
-        // Keep only links where both endpoints exist as nodes
-        .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
 
-    // Keep only players that appear in at least one assist (as passer or receiver)
-    const activeIds = new Set();
-    data.links.forEach(link => {
-        activeIds.add(link.source);
-        activeIds.add(link.target);
-    });
-    data.nodes = data.nodes.filter(node => activeIds.has(node.id));
+            const pct = v => ((v / Math.max(1, totalShots)) * 100).toFixed(1);
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-    const svg = d3.select("#network")
-        .attr("viewBox", [0, 0, width, height]);
-
-    svg.append("defs").append("marker")
-        .attr("id", "arrowhead")
-        .attr("viewBox", "-0 -5 10 10")
-        .attr("refX", 25)
-        .attr("refY", 0)
-        .attr("orient", "auto")
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
-        .attr("xoverflow", "visible")
-        .append("svg:path")
-        .attr("d", "M 0,-5 L 10 ,0 L 0,5")
-        .attr("fill", "#999")
-        .style("stroke","none");
-
-    const simulation = d3.forceSimulation(data.nodes)
-        .force("link", d3.forceLink(data.links).id(d => d.id).distance(380))
-        .force("charge", d3.forceManyBody().strength(-1400))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("x", d3.forceX(width / 2).strength(0.06))
-        .force("y", d3.forceY(height / 2).strength(0.06))
-        .force("collide", d3.forceCollide().radius(70))
-        .alphaDecay(0.02);
-
-    const link = svg.append("g")
-        .attr("class", "links")
-        .selectAll("line")
-        .data(data.links)
-        .join("line")
-        .attr("stroke-width", d => Math.sqrt(d.value) * 1.5)
-        .attr("marker-end", "url(#arrowhead)");
-
-    const tooltip = d3.select("#tooltip");
-
-    const nodeGroup = svg.append("g")
-        .attr("class", "nodes")
-        .selectAll("g")
-        .data(data.nodes)
-        .join("g")
-        .call(drag(simulation));
-
-    nodeGroup.append("circle")
-        .attr("r", 15)
-        .attr("fill", d => color(d.group || 1)) 
-        .on("mouseover", function(event, d) {
-            d3.select(this).attr("stroke", "#333").attr("stroke-width", 3);
-            tooltip.transition().duration(200).style("opacity", .9);
-            tooltip.html(`
-                <strong>${d.id}</strong><br/>
-                Team: ${d.team || 'N/A'}<br/>
-                PPG: ${d.ppg || 0}
-            `)
-            .style("left", (event.pageX + 15) + "px")
-            .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", function(d) {
-            d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1.5);
-            tooltip.transition().duration(500).style("opacity", 0);
-        });
-
-    nodeGroup.append("text")
-        .attr("class", "labels")
-        .attr("dx", 20)
-        .attr("dy", ".35em")
-        .text(d => d.id);
-
-    simulation.on("tick", () => {
-        link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-
-        nodeGroup.attr("transform", d => `translate(${d.x},${d.y})`);
-    });
-
-    function drag(simulation) {
-        function dragstarted(event) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            event.subject.fx = event.subject.x;
-            event.subject.fy = event.subject.y;
+            return {
+                totalShots,
+                paintPct: pct(paint),
+                midRangePct: pct(midRange),
+                threePointPct: pct(threePoint)
+            };
         }
-        
-        function dragged(event) {
-            event.subject.fx = event.x;
-            event.subject.fy = event.y;
+
+        function renderShotStats(shotData) {
+            shotStatsMount.selectAll("*").remove();
+            const stats = calculateShotStats(shotData);
+
+            if (!stats) {
+                shotStatsMount.append("div")
+                    .attr("class", "empty")
+                    .text("No shot data available.");
+                return;
+            }
+
+            const container = shotStatsMount.append("div")
+                .attr("style", "display: flex; flex-direction: row; gap: 16px; align-items: flex-start; flex-wrap: wrap;");
+
+            const totalCard = container.append("div").attr("class", "stat-card");
+            totalCard.append("div").attr("class", "stat-label").text("Made Shots In View");
+            totalCard.append("div").attr("class", "stat-value").text(stats.totalShots);
+
+            const zoneCard = container.append("div").attr("class", "stat-card");
+            zoneCard.append("div").attr("class", "stat-label").text("Shot Mix");
+
+            const zones = [
+                { name: "Paint", pct: Number(stats.paintPct), color: "#d9534f" },
+                { name: "Mid", pct: Number(stats.midRangePct), color: "#f0ad4e" },
+                { name: "3PT", pct: Number(stats.threePointPct), color: "#2f6df5" }
+            ];
+
+            const zoneDiv = zoneCard.append("div").attr("class", "zone-breakdown");
+            zones.forEach(zone => {
+                const row = zoneDiv.append("div").attr("class", "zone-bar");
+                row.append("div").attr("class", "zone-label").text(zone.name);
+                const bg = row.append("div").attr("class", "zone-bar-bg");
+                bg.append("div")
+                    .attr("class", "zone-bar-fill")
+                    .style("width", `${zone.pct}%`)
+                    .style("background", zone.color);
+                row.append("div").attr("class", "zone-pct").text(`${zone.pct.toFixed(1)}%`);
+            });
         }
-        
-        function dragended(event) {
-            if (!event.active) simulation.alphaTarget(0);
-            event.subject.fx = null;
-            event.subject.fy = null;
+
+        function renderShotDensity() {
+            shotDensityMount.selectAll("*").remove();
+
+            const team = teamSelect.value;
+            let currentShotData = [];
+
+            if (allShotsByTeam[team]) {
+                const shotTeamData = allShotsByTeam[team];
+                if (currentShotPlayer === "team" || !shotTeamData.by_player) {
+                    currentShotData = shotTeamData.team || [];
+                } else {
+                    currentShotData = shotTeamData.by_player[currentShotPlayer] || [];
+                }
+            }
+
+            if (!Array.isArray(currentShotData) || currentShotData.length === 0) {
+                shotDensityMount.append("div")
+                    .attr("class", "empty")
+                    .text("Shot density data is not available for this selection.");
+                shotStatsMount.selectAll("*").remove();
+                shotChip.textContent = "No shot bins loaded";
+                return;
+            }
+
+            const { width, height, x, y } = createShotCourtTransform(shotDensityMount.node()?.clientWidth || 760);
+
+            const svg = shotDensityMount.append("svg")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("preserveAspectRatio", "xMidYMid meet");
+
+            const maxCount = d3.max(currentShotData, d => Number(d.count) || 0) || 1;
+            const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxCount]);
+            const radius = d3.scaleSqrt().domain([0, maxCount]).range([2.5, 13]);
+
+            drawCourtLines(svg.append("g"), x, y);
+
+            svg.append("g")
+                .selectAll("circle")
+                .data(currentShotData)
+                .join("circle")
+                .attr("cx", d => x(Number(d.x) || 0))
+                .attr("cy", d => y(Number(d.y) || 0))
+                .attr("r", d => radius(Number(d.count) || 0))
+                .attr("fill", d => color(Number(d.count) || 0))
+                .attr("fill-opacity", 0.72)
+                .attr("stroke", "#8f4c13")
+                .attr("stroke-opacity", 0.35)
+                .on("mousemove", (event, d) => {
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>Made shots in bin:</strong> ${d.count}<br/>Center: (${d.x}, ${d.y})`)
+                        .style("left", `${event.clientX + 14}px`)
+                        .style("top", `${event.clientY - 18}px`);
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+
+            shotChip.textContent = `${currentShotData.length} made-shot bins`;
+            renderShotStats(currentShotData);
         }
-        
-        return d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended);
-    }
 
-    // --- Assist matrix heatmap (assister vs shooter) ---
+        function computeAssistInsights(graph) {
+            if (!graph || !Array.isArray(graph.links) || graph.links.length === 0) {
+                return null;
+            }
 
-    const players = data.nodes.map(d => d.id);
-    const n = players.length;
+            const outgoing = new Map();
+            const incoming = new Map();
+            const edgeValues = new Map();
+            let totalAssists = 0;
+            let topPair = { pair: "-", value: 0 };
 
-    // Aggregate values by assister -> shooter
-    const valueByPair = new Map();
-    data.links.forEach(l => {
-        // After d3.forceLink, source/target may be node objects; normalize to ids
-        const assister = typeof l.source === "string" ? l.source : l.source.id;
-        const shooter = typeof l.target === "string" ? l.target : l.target.id;
-        const key = assister + "||" + shooter;
-        valueByPair.set(key, (valueByPair.get(key) || 0) + (l.value || 0));
-    });
+            graph.links.forEach(l => {
+                const s = typeof l.source === "string" ? l.source : l.source.id;
+                const t = typeof l.target === "string" ? l.target : l.target.id;
+                const v = Number(l.value) || 0;
+                totalAssists += v;
+                outgoing.set(s, (outgoing.get(s) || 0) + v);
+                incoming.set(t, (incoming.get(t) || 0) + v);
+                edgeValues.set(`${s}||${t}`, v);
+                if (v > topPair.value) {
+                    topPair = { pair: `${s} -> ${t}`, value: v };
+                }
+            });
 
-    const matrixData = [];
-    players.forEach((shooter, row) => {
-        players.forEach((assister, col) => {
-            const key = assister + "||" + shooter;
-            const value = valueByPair.get(key) || 0;
-            matrixData.push({ row, col, assister, shooter, value });
+            const topPasser = [...outgoing.entries()].sort((a, b) => b[1] - a[1])[0] || ["-", 0];
+            const topReceiver = [...incoming.entries()].sort((a, b) => b[1] - a[1])[0] || ["-", 0];
+
+            const topPairShare = ((topPair.value / Math.max(1, totalAssists)) * 100).toFixed(1);
+
+            return {
+                totalAssists,
+                topPairShare,
+                topPasser,
+                topReceiver,
+                topPair
+            };
+        }
+
+        function renderAssistInsights(graph) {
+            assistInsightsMount.selectAll("*").remove();
+            const stats = computeAssistInsights(graph);
+
+            if (!stats) {
+                assistInsightsMount.append("div")
+                    .attr("class", "empty")
+                    .text("Assist insights unavailable.");
+                return;
+            }
+
+            const card1 = assistInsightsMount.append("div").attr("class", "stat-card");
+            card1.append("div").attr("class", "stat-label").text("Total Assisted Makes");
+            card1.append("div").attr("class", "stat-value").text(stats.totalAssists);
+
+            const card3 = assistInsightsMount.append("div").attr("class", "stat-card");
+            card3.append("div").attr("class", "stat-label").text("Top Pair Impact");
+            card3.append("div").attr("class", "stat-value").text(`${stats.topPairShare}%`);
+            card3.append("div")
+                .attr("class", "stat-sub")
+                .text("Share of all team assisted makes from the top connection");
+
+            const card4 = assistInsightsMount.append("div").attr("class", "stat-card");
+            card4.append("div").attr("class", "stat-label").text("Top Connection");
+            card4.append("div")
+                .style("font-size", "14px")
+                .style("font-weight", "700")
+                .style("color", "#24344f")
+                .text(stats.topPair.pair);
+            card4.append("div")
+                .style("margin-top", "4px")
+                .style("font-size", "12px")
+                .style("color", "#5c6b85")
+                .text(`${stats.topPair.value} assists`);
+
+            const card5 = assistInsightsMount.append("div").attr("class", "stat-card");
+            card5.append("div").attr("class", "stat-label").text("Primary Hub");
+            card5.append("div")
+                .style("font-size", "14px")
+                .style("font-weight", "700")
+                .style("color", "#24344f")
+                .text(stats.topPasser[0]);
+            card5.append("div")
+                .style("margin-top", "4px")
+                .style("font-size", "12px")
+                .style("color", "#5c6b85")
+                .text(`${stats.topPasser[1]} created, ${stats.topReceiver[1]} finished by ${stats.topReceiver[0]}`);
+        }
+
+        // ============ Chord Diagram Visualization ============
+
+        function renderChordDiagram() {
+            chordDiagramMount.html("");
+            if (!currentGraph || !currentGraph.links || currentGraph.links.length === 0) {
+                chordDiagramMount.html('<p style="color:#5c6f91;text-align:center;">No assist data</p>');
+                return;
+            }
+
+            // Get top N players by total assists (given + received)
+            const playerTotals = {};
+            currentGraph.links.forEach(link => {
+                const src = typeof link.source === 'object' ? link.source.id : link.source;
+                const tgt = typeof link.target === 'object' ? link.target.id : link.target;
+                playerTotals[src] = (playerTotals[src] || 0) + link.value;
+                playerTotals[tgt] = (playerTotals[tgt] || 0) + link.value;
+            });
+
+            const topPlayers = Object.entries(playerTotals)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8)
+                .map(([name]) => name);
+
+            const playerIndex = {};
+            topPlayers.forEach((p, i) => playerIndex[p] = i);
+            const n = topPlayers.length;
+
+            // Build matrix
+            const matrix = Array(n).fill(null).map(() => Array(n).fill(0));
+            currentGraph.links.forEach(link => {
+                const src = typeof link.source === 'object' ? link.source.id : link.source;
+                const tgt = typeof link.target === 'object' ? link.target.id : link.target;
+                if (playerIndex[src] !== undefined && playerIndex[tgt] !== undefined) {
+                    matrix[playerIndex[src]][playerIndex[tgt]] += link.value;
+                }
+            });
+
+            // Larger size with more margin for labels
+            const width = 540, height = 540;
+            const labelMargin = 100; // Space for labels
+            const outerRadius = Math.min(width, height) / 2 - labelMargin;
+            const innerRadius = outerRadius - 20;
+
+            const svg = chordDiagramMount.append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+            const chord = d3.chord()
+                .padAngle(0.05)
+                .sortSubgroups(d3.descending);
+
+            const chords = chord(matrix);
+            const color = d3.scaleOrdinal()
+                .domain(d3.range(n))
+                .range(["#3498db", "#e74c3c", "#2ecc71", "#9b59b6", "#f39c12", "#1abc9c", "#e91e63", "#00bcd4"]);
+
+            const arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+            const ribbon = d3.ribbon().radius(innerRadius);
+
+            // Draw groups (outer arcs)
+            const group = svg.append("g")
+                .selectAll("g")
+                .data(chords.groups)
+                .enter()
+                .append("g");
+
+            group.append("path")
+                .attr("d", arc)
+                .attr("fill", d => color(d.index))
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 1.5)
+                .on("mouseover", function (event, d) {
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>${topPlayers[d.index]}</strong><br>Total assists involved: ${d.value}`);
+                })
+                .on("mousemove", (event) => {
+                    tooltip.style("left", (event.pageX + 12) + "px")
+                        .style("top", (event.pageY - 10) + "px");
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+
+            // Labels - full names with better positioning
+            group.append("text")
+                .each(d => { d.angle = (d.startAngle + d.endAngle) / 2; })
+                .attr("dy", "0.35em")
+                .attr("transform", d => `
+                    rotate(${(d.angle * 180 / Math.PI - 90)})
+                    translate(${outerRadius + 12})
+                    ${d.angle > Math.PI ? "rotate(180)" : ""}
+                `)
+                .attr("text-anchor", d => d.angle > Math.PI ? "end" : "start")
+                .style("font-size", "11px")
+                .style("font-weight", "600")
+                .style("fill", "#31425f")
+                .text(d => topPlayers[d.index]);
+
+            // Draw ribbons (connections)
+            svg.append("g")
+                .attr("fill-opacity", 0.7)
+                .selectAll("path")
+                .data(chords)
+                .enter()
+                .append("path")
+                .attr("d", ribbon)
+                .attr("fill", d => color(d.source.index))
+                .attr("stroke", d => d3.rgb(color(d.source.index)).darker())
+                .attr("stroke-width", 0.5)
+                .on("mouseover", function (event, d) {
+                    d3.select(this).attr("fill-opacity", 1);
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>${topPlayers[d.source.index]} → ${topPlayers[d.target.index]}</strong><br>${d.source.value} assists`);
+                })
+                .on("mousemove", (event) => {
+                    tooltip.style("left", (event.pageX + 12) + "px")
+                        .style("top", (event.pageY - 10) + "px");
+                })
+                .on("mouseout", function () {
+                    d3.select(this).attr("fill-opacity", 0.7);
+                    tooltip.style("opacity", 0);
+                });
+        }
+
+        // ============ End Chord Diagram ============
+
+        function renderAll() {
+            currentGraph = buildFilteredGraph();
+            networkChip.textContent = `${currentGraph.nodes.length} players • ${currentGraph.links.length} links`;
+            const selectedMeta = teamMeta.find(t => t.abbreviation === teamSelect.value);
+            const teamLabel = selectedMeta ? selectedMeta.full_name : teamSelect.value;
+            statusEl.textContent = `${teamLabel}: ${currentGraph.nodes.length} players and ${currentGraph.links.length} assist connections.`;
+            renderNetwork(currentGraph);
+            if (activeViz === "chord") {
+                renderChordDiagram();
+            }
+            renderMatrix(currentGraph);
+            renderAssistInsights(currentGraph);
+            renderTopContributors(currentGraph);
+            
+            // Populate player selector for shot density
+            const team = teamSelect.value;
+            const shotTeamData = allShotsByTeam[team];
+            currentShotPlayer = "team";
+            let playerOptions = [{ value: "team", label: "All Players (Team)" }];
+            
+            if (shotTeamData && shotTeamData.by_player && typeof shotTeamData.by_player === 'object') {
+                const playerNames = Object.keys(shotTeamData.by_player)
+                    .sort((a, b) => a.localeCompare(b));
+                playerOptions = playerOptions.concat(
+                    playerNames.map(name => ({ value: name, label: name }))
+                );
+            }
+            
+            fillSelect(shotPlayerSelect, playerOptions, "team");
+            renderShotDensity();
+        }
+
+        Promise.all([
+            d3.json("assist_network_all_teams.json").catch(() => null),
+            d3.json("shot_heatmap_all_teams.json").catch(() => null),
+            d3.json("assist_network.json").catch(() => null),
+            d3.json("shot_heatmap.json").catch(() => null)
+        ]).then(([assistAll, shotAll, assistSingle, shotSingle]) => {
+            if (assistAll && assistAll.data && assistAll.teams) {
+                teamMeta = assistAll.teams;
+                teamMeta.forEach(t => {
+                    const teamData = assistAll.data[t.abbreviation] || { nodes: [], links: [] };
+                    const nodes = (teamData.nodes || []).map(node => ({
+                        ...node,
+                        id: normalizeName(node.id),
+                        team: node.team || t.abbreviation,
+                        position: node.position || "Unknown"
+                    }));
+                    const nodeIds = new Set(nodes.map(n => n.id));
+                    const links = (teamData.links || [])
+                        .map(link => ({
+                            source: normalizeName(link.source),
+                            target: normalizeName(link.target),
+                            value: Number(link.value) || 0
+                        }))
+                        .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
+                    allAssistByTeam[t.abbreviation] = { nodes, links };
+                });
+            } else if (assistSingle && Array.isArray(assistSingle.nodes) && Array.isArray(assistSingle.links)) {
+                const fallbackTeam = "DAL";
+                const nodes = assistSingle.nodes.map(node => ({
+                    ...node,
+                    id: normalizeName(node.id),
+                    team: node.team || fallbackTeam,
+                    position: node.position || "Unknown"
+                }));
+                const nodeIds = new Set(nodes.map(n => n.id));
+                const links = assistSingle.links
+                    .map(link => ({
+                        source: normalizeName(link.source),
+                        target: normalizeName(link.target),
+                        value: Number(link.value) || 0
+                    }))
+                    .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
+                allAssistByTeam[fallbackTeam] = { nodes, links };
+                teamMeta = [{ abbreviation: fallbackTeam, full_name: "Dallas Mavericks" }];
+            } else {
+                throw new Error("No assist dataset available.");
+            }
+
+            if (shotAll && shotAll.data) {
+                teamMeta.forEach(t => {
+                    const shotData = shotAll.data[t.abbreviation];
+                    // Handle both old format (array) and new format (object with team/by_player)
+                    if (Array.isArray(shotData)) {
+                        allShotsByTeam[t.abbreviation] = { team: shotData, by_player: {} };
+                    } else if (shotData && typeof shotData === 'object') {
+                        allShotsByTeam[t.abbreviation] = shotData;
+                    } else {
+                        allShotsByTeam[t.abbreviation] = { team: [], by_player: {} };
+                    }
+                });
+            } else if (Array.isArray(shotSingle)) {
+                const fallbackTeam = teamMeta[0].abbreviation;
+                allShotsByTeam[fallbackTeam] = { team: shotSingle, by_player: {} };
+            }
+
+            fillSelect(
+                teamSelect,
+                teamMeta
+                    .slice()
+                    .sort((a, b) => a.full_name.localeCompare(b.full_name))
+                    .map(t => ({ value: t.abbreviation, label: t.full_name })),
+                "DAL"
+            );
+
+            applyBtn.addEventListener("click", renderAll);
+
+            sectionTabs.forEach(button => {
+                button.addEventListener("click", () => setActiveSectionTab(button.dataset.tab));
+            });
+            
+            shotPlayerSelect.addEventListener("change", (e) => {
+                currentShotPlayer = e.target.value;
+                renderShotDensity();
+            });
+
+            vizToggleBtns.forEach(btn => {
+                btn.addEventListener("click", () => setActiveViz(btn.dataset.viz));
+            });
+            
+            window.addEventListener("resize", () => {
+                renderNetwork(currentGraph);
+                if (activeViz === "chord") {
+                    renderChordDiagram();
+                }
+                if (activeSectionTab === "assists") {
+                    renderMatrix(currentGraph);
+                    renderAssistInsights(currentGraph);
+                    renderTopContributors(currentGraph);
+                } else if (activeSectionTab === "shots") {
+                    renderShotDensity();
+                }
+            });
+
+            renderAll();
+        }).catch(error => {
+            console.error("Could not load assist network:", error);
+            document.querySelector(".page").innerHTML = `
+                <div class="panel" style="padding: 24px; text-align: center;">
+                    <h2 style="margin-top: 0;">Data Load Error</h2>
+                    <p>Could not load team datasets. Run the Python data build, then refresh.</p>
+                    <p style="margin-bottom: 0; color: #5c6f91;">Run: <code>py -m http.server 8000</code></p>
+                </div>
+            `;
         });
-    });
-
-    const cellSize = 24;
-    const margin = { top: 160, right: 40, bottom: 40, left: 160 };
-    const mWidth = margin.left + margin.right + n * cellSize;
-    const mHeight = margin.top + margin.bottom + n * cellSize;
-
-    const svgMatrix = d3.select("#assist-matrix")
-        .append("svg")
-        .attr("width", mWidth)
-        .attr("height", mHeight);
-
-    const gMatrix = svgMatrix.append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    const maxVal = d3.max(matrixData, d => d.value) || 1;
-    const colorMatrix = d3.scaleSequential(d3.interpolateYlOrRd)
-        .domain([0, maxVal]); // light yellow low, red high
-
-    // Cells
-    gMatrix.selectAll("rect")
-        .data(matrixData)
-        .join("rect")
-        .attr("x", d => d.col * cellSize)
-        .attr("y", d => d.row * cellSize)
-        .attr("width", cellSize)
-        .attr("height", cellSize)
-        .attr("fill", d => d.value ? colorMatrix(d.value) : "#f5f5f5")
-        .attr("stroke", "#e0e0e0")
-        .on("mouseover", function(event, d) {
-            d3.select(this).attr("stroke", "#333").attr("stroke-width", 1.5);
-            tooltip.transition().duration(150).style("opacity", 0.95);
-            tooltip.html(`
-                <strong>Assister:</strong> ${d.assister}<br/>
-                <strong>Shooter:</strong> ${d.shooter}<br/>
-                <strong>Assisted makes:</strong> ${d.value}
-            `)
-            .style("left", (event.pageX + 15) + "px")
-            .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("stroke", "#e0e0e0").attr("stroke-width", 1);
-            tooltip.transition().duration(300).style("opacity", 0);
-        });
-
-    // Column labels (assisters) on top
-    svgMatrix.append("g")
-        .attr("transform", `translate(${margin.left},${margin.top - 5})`)
-        .selectAll("text")
-        .data(players)
-        .join("text")
-        .attr("transform", (_, i) => `translate(${i * cellSize + cellSize / 2},0) rotate(-60)`)
-        .attr("text-anchor", "start")
-        .style("font-size", "10px")
-        .text(d => d);
-
-    // Row labels (shooters) on left
-    svgMatrix.append("g")
-        .attr("transform", `translate(${margin.left - 10},${margin.top})`)
-        .selectAll("text")
-        .data(players)
-        .join("text")
-        .attr("x", 0)
-        .attr("y", (_, i) => i * cellSize + cellSize / 2)
-        .attr("dy", "0.32em")
-        .attr("text-anchor", "end")
-        .style("font-size", "10px")
-        .text(d => d);
-
-    // Axis titles
-    svgMatrix.append("text")
-        .attr("x", margin.left + (n * cellSize) / 2)
-        .attr("y", margin.top - 80) // a bit above column names
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text("Assister (x-axis)");
-
-    svgMatrix.append("text")
-        .attr("x", margin.left - 100) // closer to row names / grid
-        .attr("y", margin.top + (n * cellSize) / 2)
-        .attr("text-anchor", "middle")
-        .attr("transform", `rotate(-90, ${margin.left - 100}, ${margin.top + (n * cellSize) / 2})`)
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text("Shooter (y-axis)");
-
-}).catch(function(error) {
-    console.error("Error loading the JSON data: ", error);
-    d3.select("body").append("h2")
-      .style("color", "red")
-      .style("text-align", "center")
-      .style("margin-top", "20%")
-      .style("font-family", "Arial, sans-serif")
-      .text("Failed to load assist_network.json. Make sure your Python server is running!");
-});
-
-/* Shot heatmap code kept for reference, but disabled.
-// --- Shot heatmap on a basketball court ---
-
-d3.json("shot_heatmap.json").then(function(heatmap) {
-    ...
-}).catch(function(error) {
-    console.error("Error loading the shot heatmap data: ", error);
-});
-*/
-</script>
+    </script>
 </body>
 </html>
