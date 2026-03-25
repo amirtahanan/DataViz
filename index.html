@@ -533,6 +533,28 @@
                         <select id="team-select"></select>
                     </div>
 
+                    <div class="field">
+                        <label for="position-select">Position</label>
+                        <select id="position-select">
+                            <option value="all">All Positions</option>
+                            <option value="G">Guards (G)</option>
+                            <option value="F">Forwards (F)</option>
+                            <option value="C">Centers (C)</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="min-assists">Min Assists: <span id="min-assists-val">1</span></label>
+                        <input type="range" id="min-assists" min="1" max="20" value="1" style="width: 100%;">
+                    </div>
+
+                    <div class="field">
+                        <label for="highlight-player">Highlight Player</label>
+                        <select id="highlight-player">
+                            <option value="">None</option>
+                        </select>
+                    </div>
+
                     <button id="apply-btn" class="btn">Apply Filters</button>
                     <p id="status"></p>
                 </div>
@@ -631,6 +653,10 @@
     <script>
         const tooltip = d3.select("#tooltip");
         const teamSelect = document.getElementById("team-select");
+        const positionSelect = document.getElementById("position-select");
+        const minAssistsSlider = document.getElementById("min-assists");
+        const minAssistsVal = document.getElementById("min-assists-val");
+        const highlightPlayerSelect = document.getElementById("highlight-player");
         const applyBtn = document.getElementById("apply-btn");
         const shotPlayerSelect = document.getElementById("shot-player-select");
         const statusEl = document.getElementById("status");
@@ -660,6 +686,7 @@
         let currentShotPlayer = "team";
         let activeSectionTab = "assists";
         let activeViz = "network";
+        let highlightedPlayer = "";
 
         function setActiveViz(vizName) {
             activeViz = vizName;
@@ -733,12 +760,59 @@
 
         function buildFilteredGraph() {
             const team = teamSelect.value;
+            const positionFilter = positionSelect.value;
+            const minAssists = parseInt(minAssistsSlider.value) || 1;
+            highlightedPlayer = highlightPlayerSelect.value;
 
             const teamData = allAssistByTeam[team] || { nodes: [], links: [] };
-            const nodes = (teamData.nodes || []).map(n => ({ ...n }));
-            const links = (teamData.links || []).map(l => ({ ...l }));
+            let nodes = (teamData.nodes || []).map(n => ({ ...n }));
+            let links = (teamData.links || []).map(l => ({ ...l }));
+
+            // Filter by position
+            if (positionFilter !== "all") {
+                const positionNodes = new Set();
+                nodes = nodes.filter(n => {
+                    const pos = (n.position || "").toUpperCase();
+                    const match = pos.includes(positionFilter);
+                    if (match) positionNodes.add(n.id);
+                    return match;
+                });
+                // Keep links where both source and target match position
+                links = links.filter(l => {
+                    const s = typeof l.source === "string" ? l.source : l.source.id;
+                    const t = typeof l.target === "string" ? l.target : l.target.id;
+                    return positionNodes.has(s) && positionNodes.has(t);
+                });
+            }
+
+            // Filter by minimum assists
+            links = links.filter(l => (l.value || 0) >= minAssists);
+
+            // Remove orphan nodes (no connections after filtering)
+            const connectedNodes = new Set();
+            links.forEach(l => {
+                const s = typeof l.source === "string" ? l.source : l.source.id;
+                const t = typeof l.target === "string" ? l.target : l.target.id;
+                connectedNodes.add(s);
+                connectedNodes.add(t);
+            });
+            nodes = nodes.filter(n => connectedNodes.has(n.id));
 
             return { nodes, links };
+        }
+
+        function updateHighlightPlayerOptions() {
+            const team = teamSelect.value;
+            const teamData = allAssistByTeam[team] || { nodes: [] };
+            const players = (teamData.nodes || []).map(n => n.id).sort();
+            
+            highlightPlayerSelect.innerHTML = '<option value="">None</option>';
+            players.forEach(name => {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = name;
+                highlightPlayerSelect.appendChild(opt);
+            });
         }
 
         function renderNetwork(graph) {
@@ -908,15 +982,8 @@
                 })
                 .on("mouseout", () => {
                     tooltip.style("opacity", 0);
-                    links
-                        .attr("stroke", "#6b788f")
-                        .attr("stroke-opacity", 0.6)
-                        .attr("stroke-width", d => linkStroke(Number(d.value) || 1));
-                    nodes
-                        .attr("fill", "#d8deea")
-                        .attr("stroke", "#7f8fa8")
-                        .attr("opacity", 1);
-                    labels.attr("opacity", 1);
+                    // Apply persistent highlight if set
+                    applyHighlight(links, nodes, labels, linkStroke, graph);
                 });
 
             const labels = gLabels.selectAll("text")
@@ -931,6 +998,87 @@
                 .attr("stroke-width", 3)
                 .attr("stroke-linejoin", "round")
                 .attr("pointer-events", "none");
+
+            // Helper to apply persistent highlight
+            function applyHighlight(links, nodes, labels, linkStroke, graph) {
+                if (!highlightedPlayer) {
+                    // Reset to default
+                    links
+                        .attr("stroke", "#6b788f")
+                        .attr("stroke-opacity", 0.6)
+                        .attr("stroke-width", d => linkStroke(Number(d.value) || 1));
+                    nodes
+                        .attr("fill", "#d8deea")
+                        .attr("stroke", "#7f8fa8")
+                        .attr("opacity", 1);
+                    labels.attr("opacity", 1);
+                    return;
+                }
+
+                // Highlight selected player
+                links
+                    .attr("stroke", l => {
+                        const source = typeof l.source === "string" ? l.source : l.source.id;
+                        const target = typeof l.target === "string" ? l.target : l.target.id;
+                        if (source === highlightedPlayer) return "#d86e11";
+                        if (target === highlightedPlayer) return "#2f6df5";
+                        return "#c5cfdf";
+                    })
+                    .attr("stroke-opacity", l => {
+                        const source = typeof l.source === "string" ? l.source : l.source.id;
+                        const target = typeof l.target === "string" ? l.target : l.target.id;
+                        return (source === highlightedPlayer || target === highlightedPlayer) ? 0.95 : 0.14;
+                    })
+                    .attr("stroke-width", l => {
+                        const base = linkStroke(Number(l.value) || 1);
+                        const source = typeof l.source === "string" ? l.source : l.source.id;
+                        const target = typeof l.target === "string" ? l.target : l.target.id;
+                        return (source === highlightedPlayer || target === highlightedPlayer) ? base * 1.55 : base * 0.75;
+                    });
+
+                nodes
+                    .attr("fill", n => {
+                        if (n.id === highlightedPlayer) return "#f7cf35";
+                        const connected = graph.links.some(l => {
+                            const source = typeof l.source === "string" ? l.source : l.source.id;
+                            const target = typeof l.target === "string" ? l.target : l.target.id;
+                            return (source === highlightedPlayer && target === n.id) || (target === highlightedPlayer && source === n.id);
+                        });
+                        return connected ? "#cfdcf6" : "#edf1f8";
+                    })
+                    .attr("stroke", n => {
+                        if (n.id === highlightedPlayer) return "#9a7a0a";
+                        const connected = graph.links.some(l => {
+                            const source = typeof l.source === "string" ? l.source : l.source.id;
+                            const target = typeof l.target === "string" ? l.target : l.target.id;
+                            return (source === highlightedPlayer && target === n.id) || (target === highlightedPlayer && source === n.id);
+                        });
+                        return connected ? "#6f88b9" : "#ced7e6";
+                    })
+                    .attr("opacity", n => {
+                        if (n.id === highlightedPlayer) return 1;
+                        const connected = graph.links.some(l => {
+                            const source = typeof l.source === "string" ? l.source : l.source.id;
+                            const target = typeof l.target === "string" ? l.target : l.target.id;
+                            return (source === highlightedPlayer && target === n.id) || (target === highlightedPlayer && source === n.id);
+                        });
+                        return connected ? 1 : 0.35;
+                    });
+
+                labels
+                    .attr("opacity", n => {
+                        if (n.id === highlightedPlayer) return 1;
+                        const connected = graph.links.some(l => {
+                            const source = typeof l.source === "string" ? l.source : l.source.id;
+                            const target = typeof l.target === "string" ? l.target : l.target.id;
+                            return (source === highlightedPlayer && target === n.id) || (target === highlightedPlayer && source === n.id);
+                        });
+                        return connected ? 1 : 0.3;
+                    });
+            }
+
+            // Apply initial highlight if set
+            applyHighlight(links, nodes, labels, linkStroke, graph);
 
             simulation.on("tick", () => {
                 links
@@ -1803,7 +1951,20 @@
                 "DAL"
             );
 
+            // Initialize highlight player options
+            updateHighlightPlayerOptions();
+
             applyBtn.addEventListener("click", renderAll);
+
+            // Update highlight options when team changes
+            teamSelect.addEventListener("change", () => {
+                updateHighlightPlayerOptions();
+            });
+
+            // Live update for min assists slider
+            minAssistsSlider.addEventListener("input", () => {
+                minAssistsVal.textContent = minAssistsSlider.value;
+            });
 
             sectionTabs.forEach(button => {
                 button.addEventListener("click", () => setActiveSectionTab(button.dataset.tab));
