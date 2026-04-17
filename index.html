@@ -191,30 +191,52 @@
 
         .field label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
+            margin-bottom: 7px;
+            font-size: 11px;
             font-weight: 700;
-            color: #2f3a4f;
+            color: #60718c;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.09em;
         }
 
         .field select {
             width: 100%;
-            border: 1px solid #c8d1e0;
-            border-radius: 8px;
-            background: #ffffff;
-            color: #1f2735;
+            border: 1px solid #cad5e7;
+            border-radius: 12px;
+            background-color: #ffffff;
+            background-image:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 247, 252, 0.96)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.25 7 9l4-3.75' fill='none' stroke='%23485a78' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat, no-repeat;
+            background-position: 0 0, right 14px center;
+            background-size: auto, 14px 14px;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 1px 2px rgba(70, 90, 120, 0.05);
+            color: #20304a;
             font-family: "Manrope", sans-serif;
             font-size: 14px;
-            padding: 10px 12px;
+            font-weight: 700;
+            padding: 12px 42px 12px 14px;
             outline: none;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .field select option {
+            color: #20304a;
+            background: #ffffff;
+        }
+
+        .field select:hover {
+            border-color: #aebdd7;
+            background-image:
+                linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(240, 245, 252, 1)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 5.25 7 9l4-3.75' fill='none' stroke='%232f6df5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
         }
 
         .field select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(47, 109, 245, 0.15);
+            border-color: #2f6df5;
+            box-shadow: 0 0 0 4px rgba(47, 109, 245, 0.14), 0 10px 18px rgba(47, 109, 245, 0.08);
         }
 
         .btn {
@@ -257,6 +279,10 @@
 
         .heatmap-panel {
             margin-top: 14px;
+        }
+
+        #tab-shots .panel {
+            overflow: visible;
         }
 
         .assist-heatmap-layout {
@@ -336,22 +362,109 @@
         }
 
         .shot-top-bar {
+            position: relative;
+            z-index: 3;
             display: flex;
-            gap: 16px;
-            align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 14px;
+            align-items: stretch;
         }
 
         .shot-top-bar .controls {
-            padding: 0;
-            border-bottom: none;
+            position: relative;
+            z-index: 4;
+            display: flex;
+            gap: 12px;
+            align-items: end;
+            flex-wrap: wrap;
+            flex: 0 0 auto;
+            padding: 14px 16px;
+            border: 1px solid #d8dfeb;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #fdfefe 0%, #f4f7fc 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 22px rgba(28, 42, 66, 0.07);
+            pointer-events: auto;
+        }
+
+        .shot-top-bar .field {
+            margin-bottom: 0;
+            min-width: 220px;
+            flex: 1 1 220px;
+        }
+
+        .shot-top-bar .field label {
+            margin-bottom: 7px;
+            font-size: 11px;
+            letter-spacing: 0.09em;
+            color: #60718c;
+        }
+
+        .shot-view-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .shot-view-btn {
+            border: 1px solid #cad5e7;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #ffffff 0%, #f4f7fc 100%);
+            color: #20304a;
+            padding: 10px 14px;
+            font-family: "Manrope", sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .shot-view-btn:hover {
+            border-color: #aebdd7;
+            background: linear-gradient(180deg, #ffffff 0%, #eef3fc 100%);
+        }
+
+        .shot-view-btn.is-active {
+            border-color: #2f6df5;
+            background: linear-gradient(180deg, #3f79f0 0%, #2f6df5 100%);
+            color: #ffffff;
+            box-shadow: 0 10px 18px rgba(47, 109, 245, 0.16);
+        }
+
+        .shot-top-bar .field select {
+            width: 100%;
+            border: 1px solid #cad5e7;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 1px 2px rgba(70, 90, 120, 0.05);
+            padding: 12px 42px 12px 14px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #20304a;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .shot-top-bar .field select option {
+            color: #20304a;
+            background: #ffffff;
+        }
+
+        .shot-top-bar .field select:hover {
+            border-color: #aebdd7;
+            background: #ffffff;
+        }
+
+        .shot-top-bar .field select:focus {
+            border-color: #2f6df5;
+            box-shadow: 0 0 0 4px rgba(47, 109, 245, 0.14), 0 10px 18px rgba(47, 109, 245, 0.08);
         }
 
         #shot-stats {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            flex: 1;
+            width: 100%;
             align-items: flex-start;
         }
 
@@ -361,6 +474,8 @@
         }
 
         #shot-density-chart {
+            position: relative;
+            z-index: 1;
             min-height: 620px;
             display: flex;
             justify-content: center;
@@ -493,6 +608,14 @@
 
             .shot-top-bar {
                 flex-direction: column;
+            }
+
+            .shot-top-bar .controls {
+                width: 100%;
+            }
+
+            .shot-top-bar .field {
+                min-width: 100%;
             }
 
             #network {
@@ -633,6 +756,14 @@
                         <div class="shot-top-bar">
                             <div class="controls">
                                 <div class="field">
+                                    <label>Shot Type</label>
+                                    <div class="shot-view-toggle" role="tablist" aria-label="Shot Type">
+                                        <button class="shot-view-btn is-active" data-shot-view="self" type="button">Self-Created Shots</button>
+                                        <button class="shot-view-btn" data-shot-view="assisted" type="button">Scored Off Assists</button>
+                                        <button class="shot-view-btn" data-shot-view="created" type="button">Their Assists</button>
+                                    </div>
+                                </div>
+                                <div class="field">
                                     <label for="shot-player-select">Player</label>
                                     <select id="shot-player-select">
                                         <option value="team">All Players (Team)</option>
@@ -658,6 +789,7 @@
         const minAssistsVal = document.getElementById("min-assists-val");
         const highlightPlayerSelect = document.getElementById("highlight-player");
         const applyBtn = document.getElementById("apply-btn");
+        const shotViewButtons = [...document.querySelectorAll(".shot-view-btn")];
         const shotPlayerSelect = document.getElementById("shot-player-select");
         const statusEl = document.getElementById("status");
         const networkChip = document.getElementById("network-chip");
@@ -665,6 +797,7 @@
         const passersChip = document.getElementById("passers-chip");
         const targetsChip = document.getElementById("targets-chip");
         const shotChip = document.getElementById("shot-chip");
+        const PREFER_SINGLE_TEAM_DATA = false;
         const sectionTabs = document.querySelectorAll(".section-tab");
         const sectionPanels = document.querySelectorAll(".tab-panel");
 
@@ -683,10 +816,13 @@
         let teamMeta = [];
         let currentGraph = { nodes: [], links: [] };
         let shotHeatmap = [];
+        let currentShotView = "self";
         let currentShotPlayer = "team";
         let activeSectionTab = "assists";
         let activeViz = "network";
         let highlightedPlayer = "";
+
+        const SHOT_DISPLAY_BIN_SIZE = 40;
 
         function setActiveViz(vizName) {
             activeViz = vizName;
@@ -744,6 +880,268 @@
                 }
                 selectEl.appendChild(node);
             });
+
+            if (!selectEl.options.length) {
+                selectEl.value = "";
+                return;
+            }
+
+            const hasDefault = options.some(option => option.value === defaultValue);
+            selectEl.value = hasDefault ? defaultValue : options[0].value;
+        }
+
+        function normalizeShotBins(bins) {
+            if (!Array.isArray(bins)) {
+                return [];
+            }
+
+            return bins.map(bin => ({
+                x: Number(bin.x) || 0,
+                y: Number(bin.y) || 0,
+                count: Number(bin.count) || 0,
+                bin_size: Number(bin.bin_size) || 20
+            }));
+        }
+
+        function normalizeShotBinMap(map) {
+            if (!map || typeof map !== "object") {
+                return {};
+            }
+
+            return Object.fromEntries(
+                Object.entries(map).map(([name, bins]) => [normalizeName(name), normalizeShotBins(bins)])
+            );
+        }
+
+        function normalizeShotTeamData(shotData) {
+            if (Array.isArray(shotData)) {
+                return {
+                    team: normalizeShotBins(shotData),
+                    by_player: {},
+                    assisted_team: [],
+                    assisted_by_player: {},
+                    by_assister: {},
+                    by_assist_pair: {},
+                    meta: {}
+                };
+            }
+
+            if (!shotData || typeof shotData !== "object") {
+                return {
+                    team: [],
+                    by_player: {},
+                    assisted_team: [],
+                    assisted_by_player: {},
+                    by_assister: {},
+                    by_assist_pair: {},
+                    meta: {}
+                };
+            }
+
+            return {
+                team: normalizeShotBins(shotData.team),
+                by_player: normalizeShotBinMap(shotData.by_player),
+                assisted_team: normalizeShotBins(shotData.assisted_team),
+                assisted_by_player: normalizeShotBinMap(shotData.assisted_by_player),
+                by_assister: normalizeShotBinMap(shotData.by_assister),
+                by_assist_pair: normalizeShotBinMap(shotData.by_assist_pair),
+                meta: shotData.meta && typeof shotData.meta === "object" ? shotData.meta : {}
+            };
+        }
+
+        function subtractShotBins(baseBins, subtractBins) {
+            const counts = new Map();
+
+            normalizeShotBins(baseBins).forEach(bin => {
+                const key = `${bin.x}|${bin.y}`;
+                counts.set(key, {
+                    x: bin.x,
+                    y: bin.y,
+                    count: (counts.get(key)?.count || 0) + bin.count,
+                    bin_size: bin.bin_size
+                });
+            });
+
+            normalizeShotBins(subtractBins).forEach(bin => {
+                const key = `${bin.x}|${bin.y}`;
+                const existing = counts.get(key) || { x: bin.x, y: bin.y, count: 0, bin_size: bin.bin_size };
+                existing.count -= bin.count;
+                counts.set(key, existing);
+            });
+
+            return [...counts.values()]
+                .filter(bin => bin.count > 0)
+                .sort((a, b) => b.count - a.count);
+        }
+
+        function aggregateShotBins(bins, targetBinSize = SHOT_DISPLAY_BIN_SIZE) {
+            const aggregated = new Map();
+
+            normalizeShotBins(bins).forEach(bin => {
+                const bucketX = Math.round(bin.x / targetBinSize);
+                const bucketY = Math.round(bin.y / targetBinSize);
+                const key = `${bucketX}|${bucketY}`;
+                const current = aggregated.get(key) || {
+                    bucketX,
+                    bucketY,
+                    count: 0,
+                    xTotal: 0,
+                    yTotal: 0
+                };
+
+                current.count += bin.count;
+                current.xTotal += bin.x * bin.count;
+                current.yTotal += bin.y * bin.count;
+                aggregated.set(key, current);
+            });
+
+            return [...aggregated.values()].map(bin => ({
+                x: Number((bin.xTotal / bin.count).toFixed(1)),
+                y: Number((bin.yTotal / bin.count).toFixed(1)),
+                count: bin.count,
+                bin_size: targetBinSize
+            }));
+        }
+
+        function combineShotBinsFromMap(binMap) {
+            if (!binMap || typeof binMap !== "object") {
+                return [];
+            }
+
+            const merged = new Map();
+            Object.values(binMap).forEach(bins => {
+                normalizeShotBins(bins).forEach(bin => {
+                    const key = `${bin.x}|${bin.y}`;
+                    const existing = merged.get(key) || {
+                        x: bin.x,
+                        y: bin.y,
+                        count: 0,
+                        bin_size: bin.bin_size
+                    };
+                    existing.count += bin.count;
+                    merged.set(key, existing);
+                });
+            });
+
+            return [...merged.values()].sort((a, b) => b.count - a.count);
+        }
+
+        function hasAssistedShotData(shotTeamData) {
+            return Boolean(
+                shotTeamData && (
+                    (shotTeamData.assisted_team || []).length ||
+                    Object.keys(shotTeamData.assisted_by_player || {}).length ||
+                    Object.keys(shotTeamData.by_assister || {}).length
+                )
+            );
+        }
+
+        function syncShotViewButtons() {
+            shotViewButtons.forEach(button => {
+                const isActive = button.dataset.shotView === currentShotView;
+                button.classList.toggle("is-active", isActive);
+                button.setAttribute("aria-pressed", isActive ? "true" : "false");
+            });
+        }
+
+        function refreshShotViewOptions(shotTeamData) {
+            void shotTeamData;
+            syncShotViewButtons();
+        }
+
+        function getShotSelectionLabel() {
+            if (currentShotView === "self") {
+                return currentShotPlayer === "team" ? "Team self-created makes" : `${currentShotPlayer} self-created makes`;
+            }
+            if (currentShotView === "assisted") {
+                return currentShotPlayer === "team" ? "Team points scored off assists" : `${currentShotPlayer} points scored off assists`;
+            }
+            return currentShotPlayer === "team" ? "Team assists leading to scores" : `${currentShotPlayer} assists leading to scores`;
+        }
+
+        function getShotEmptyState(shotTeamData) {
+            if (!shotTeamData || (!(shotTeamData.team || []).length && !hasAssistedShotData(shotTeamData))) {
+                return "Shot chart data is not available for this team in the current dataset.";
+            }
+            if (currentShotView === "assisted") {
+                return currentShotPlayer === "team"
+                    ? "No scored-off-assist shots are available for this team."
+                    : `No scored-off-assist shots are available for ${currentShotPlayer}.`;
+            }
+            if (currentShotView === "created") {
+                return currentShotPlayer === "team"
+                    ? "No assist-created scoring events are available for this team."
+                    : `No assist-created scoring events are available for ${currentShotPlayer}.`;
+            }
+            return "Shot density data is not available for this selection.";
+        }
+
+        function getShotPlayerOptions(shotTeamData, team) {
+            if (!shotTeamData) {
+                return [{ value: "team", label: "All Players (Team)" }];
+            }
+
+            if (currentShotView === "created") {
+                const passers = Object.keys(shotTeamData.by_assister || {})
+                    .sort((a, b) => a.localeCompare(b));
+                return [{ value: "team", label: "All Passers (Team)" }].concat(
+                    passers.map(name => ({ value: name, label: name }))
+                );
+            }
+
+            if (currentShotView === "assisted") {
+                const scorers = Object.keys(shotTeamData.assisted_by_player || {})
+                    .sort((a, b) => a.localeCompare(b));
+                return [{ value: "team", label: "All Players (Team)" }].concat(
+                    scorers.map(name => ({ value: name, label: name }))
+                );
+            }
+
+            const playerNames = new Set((allAssistByTeam[team]?.nodes || []).map(node => node.id));
+            Object.keys(shotTeamData.by_player || {}).forEach(name => playerNames.add(name));
+
+            return [{ value: "team", label: "All Players (Team)" }].concat(
+                [...playerNames]
+                    .sort((a, b) => a.localeCompare(b))
+                    .map(name => ({ value: name, label: name }))
+            );
+        }
+
+        function syncShotPlayerSelect(shotTeamData) {
+            const options = getShotPlayerOptions(shotTeamData, teamSelect.value);
+            const optionValues = new Set(options.map(option => option.value));
+            if (!optionValues.has(currentShotPlayer)) {
+                currentShotPlayer = "team";
+            }
+            fillSelect(shotPlayerSelect, options, currentShotPlayer);
+        }
+
+        function getRawShotDataForSelection(shotTeamData) {
+            if (!shotTeamData) {
+                return [];
+            }
+
+            if (currentShotView === "self") {
+                if (currentShotPlayer === "team") {
+                    return subtractShotBins(shotTeamData.team, shotTeamData.assisted_team);
+                }
+                return subtractShotBins(shotTeamData.by_player?.[currentShotPlayer], shotTeamData.assisted_by_player?.[currentShotPlayer]);
+            }
+
+            if (currentShotView === "assisted") {
+                if (currentShotPlayer === "team") {
+                    return (shotTeamData.assisted_team && shotTeamData.assisted_team.length)
+                        ? shotTeamData.assisted_team
+                        : combineShotBinsFromMap(shotTeamData.assisted_by_player);
+                }
+                return shotTeamData.assisted_by_player?.[currentShotPlayer] || [];
+            }
+
+            if (currentShotPlayer === "team") {
+                const createdTeamBins = combineShotBinsFromMap(shotTeamData.by_assister);
+                return createdTeamBins.length ? createdTeamBins : (shotTeamData.assisted_team || []);
+            }
+            return shotTeamData.by_assister?.[currentShotPlayer] || [];
         }
 
         function getNodeDegrees(links) {
@@ -1328,9 +1726,7 @@
         }
 
         function drawCourtLines(group, x, y) {
-            const line = "#27364f";
-
-            group.attr("pointer-events", "none");
+            const line = "#4d5f7d";
 
             function arcPathDataSpace(cx, cy, r, startDeg, endDeg, steps = 64) {
                 const points = [];
@@ -1349,16 +1745,16 @@
                 .attr("height", y(-47.5) - y(422.5))
                 .attr("fill", "none")
                 .attr("stroke", line)
-                .attr("stroke-width", 2)
-                .attr("opacity", 0.88);
+                .attr("stroke-width", 1.8)
+                .attr("opacity", 0.72);
 
             group.append("rect")
                 .attr("x", x(-80))
                 .attr("y", y(142.5))
                 .attr("width", x(80) - x(-80))
                 .attr("height", y(-47.5) - y(142.5))
-                .attr("fill", "#f4f7fb")
-                .attr("opacity", 0.42);
+                .attr("fill", "#edf2fb")
+                .attr("opacity", 0.75);
 
             // Lane space hash marks (at 7, 8, 11, and 14 feet from baseline).
             [22.5, 32.5, 62.5, 92.5].forEach(mark => {
@@ -1368,8 +1764,8 @@
                     .attr("y1", y(mark))
                     .attr("y2", y(mark))
                     .attr("stroke", line)
-                    .attr("stroke-width", 1.3)
-                    .attr("opacity", 0.7);
+                    .attr("stroke-width", 1.2)
+                    .attr("opacity", 0.55);
 
                 group.append("line")
                     .attr("x1", x(80))
@@ -1377,8 +1773,8 @@
                     .attr("y1", y(mark))
                     .attr("y2", y(mark))
                     .attr("stroke", line)
-                    .attr("stroke-width", 1.3)
-                    .attr("opacity", 0.7);
+                    .attr("stroke-width", 1.2)
+                    .attr("opacity", 0.55);
             });
 
             group.append("rect")
@@ -1388,15 +1784,15 @@
                 .attr("height", y(-47.5) - y(142.5))
                 .attr("fill", "none")
                 .attr("stroke", line)
-                .attr("stroke-width", 1.8)
-                .attr("opacity", 0.82);
+                .attr("stroke-width", 1.5)
+                .attr("opacity", 0.7);
 
             group.append("path")
                 .attr("d", arcPathDataSpace(0, 142.5, 60, 0, 180))
                 .attr("fill", "none")
                 .attr("stroke", line)
-                .attr("stroke-width", 1.6)
-                .attr("opacity", 0.82);
+                .attr("stroke-width", 1.4)
+                .attr("opacity", 0.72);
 
             group.append("path")
                 .attr("d", arcPathDataSpace(0, 142.5, 60, 180, 360))
@@ -1404,7 +1800,7 @@
                 .attr("stroke", line)
                 .attr("stroke-width", 1.1)
                 .attr("stroke-dasharray", "5,5")
-                .attr("opacity", 0.55);
+                .attr("opacity", 0.44);
 
             group.append("circle")
                 .attr("cx", x(0))
@@ -1412,8 +1808,8 @@
                 .attr("r", Math.abs(x(7.5) - x(0)))
                 .attr("fill", "none")
                 .attr("stroke", line)
-                .attr("stroke-width", 1.7)
-                .attr("opacity", 0.96);
+                .attr("stroke-width", 1.5)
+                .attr("opacity", 0.9);
 
             group.append("line")
                 .attr("x1", x(-30))
@@ -1422,7 +1818,7 @@
                 .attr("y2", y(-12.5))
                 .attr("stroke", line)
                 .attr("stroke-width", 2.2)
-                .attr("opacity", 0.95);
+                .attr("opacity", 0.85);
 
             group.append("line")
                 .attr("x1", x(-40))
@@ -1431,14 +1827,14 @@
                 .attr("y2", y(-47.5))
                 .attr("stroke", line)
                 .attr("stroke-width", 1.6)
-                .attr("opacity", 0.7);
+                .attr("opacity", 0.52);
 
             group.append("path")
                 .attr("d", arcPathDataSpace(0, 0, 40, 0, 180))
                 .attr("fill", "none")
                 .attr("stroke", line)
-                .attr("stroke-width", 1.5)
-                .attr("opacity", 0.82);
+                .attr("stroke-width", 1.3)
+                .attr("opacity", 0.74);
 
             group.append("line")
                 .attr("x1", x(-220))
@@ -1446,8 +1842,8 @@
                 .attr("y1", y(-47.5))
                 .attr("y2", y(92.5))
                 .attr("stroke", line)
-                .attr("stroke-width", 1.5)
-                .attr("opacity", 0.84);
+                .attr("stroke-width", 1.3)
+                .attr("opacity", 0.72);
 
             group.append("line")
                 .attr("x1", x(220))
@@ -1455,16 +1851,16 @@
                 .attr("y1", y(-47.5))
                 .attr("y2", y(92.5))
                 .attr("stroke", line)
-                .attr("stroke-width", 1.5)
-                .attr("opacity", 0.84);
+                .attr("stroke-width", 1.3)
+                .attr("opacity", 0.72);
 
             const cornerAngle = (Math.asin(92.5 / 237.5) * 180) / Math.PI;
             group.append("path")
                 .attr("d", arcPathDataSpace(0, 0, 237.5, cornerAngle, 180 - cornerAngle))
                 .attr("fill", "none")
                 .attr("stroke", line)
-                .attr("stroke-width", 1.7)
-                .attr("opacity", 0.86);
+                .attr("stroke-width", 1.5)
+                .attr("opacity", 0.76);
 
             group.append("line")
                 .attr("x1", x(-250))
@@ -1489,7 +1885,7 @@
             const xMin = -250;
             const xMax = 250;
             const yMin = -47.5;
-            const yMax = 350;
+            const yMax = 422.5;
             const width = Math.max(680, Math.floor(containerWidth || 760));
             const unit = (width - margin.left - margin.right) / (xMax - xMin);
             const height = Math.round((yMax - yMin) * unit + margin.top + margin.bottom);
@@ -1550,7 +1946,7 @@
                 .attr("style", "display: flex; flex-direction: row; gap: 16px; align-items: flex-start; flex-wrap: wrap;");
 
             const totalCard = container.append("div").attr("class", "stat-card");
-            totalCard.append("div").attr("class", "stat-label").text("Made Shots In View");
+            totalCard.append("div").attr("class", "stat-label").text(getShotSelectionLabel());
             totalCard.append("div").attr("class", "stat-value").text(stats.totalShots);
 
             const zoneCard = container.append("div").attr("class", "stat-card");
@@ -1575,170 +1971,24 @@
             });
         }
 
-        function buildShotZones() {
-            const threeR = 237.5;
-            const cornerAngle = (Math.asin(92.5 / threeR) * 180) / Math.PI;
-            const upperLeftSplit = 116;
-            const upperRightSplit = 64;
-
-            function arcPoints(r, startDeg, endDeg, step = 4) {
-                const points = [];
-                const direction = startDeg <= endDeg ? 1 : -1;
-                const delta = Math.abs(step) * direction;
-
-                for (let angle = startDeg; direction > 0 ? angle <= endDeg : angle >= endDeg; angle += delta) {
-                    const rad = (angle * Math.PI) / 180;
-                    points.push([r * Math.cos(rad), r * Math.sin(rad)]);
-                }
-
-                const endRad = (endDeg * Math.PI) / 180;
-                points.push([r * Math.cos(endRad), r * Math.sin(endRad)]);
-                return points;
-            }
-
-            const leftTopArcX = threeR * Math.cos((upperLeftSplit * Math.PI) / 180);
-            const rightTopArcX = threeR * Math.cos((upperRightSplit * Math.PI) / 180);
-
-            return [
-                {
-                    id: "close",
-                    name: "Close Range",
-                    kind: "polygon",
-                    points: [[0, 0], ...arcPoints(40, 0, 180)],
-                },
-                {
-                    id: "under-goal",
-                    name: "Under Goal",
-                    kind: "polygon",
-                    points: [[-40, -47.5], [40, -47.5], [40, 0], [-40, 0]],
-                },
-                {
-                    id: "paint",
-                    name: "Paint",
-                    kind: "polygon",
-                    points: [[-80, -47.5], [80, -47.5], [80, 142.5], [-80, 142.5]],
-                },
-                {
-                    id: "mid-baseline-left",
-                    name: "Mid Baseline Left",
-                    kind: "polygon",
-                    points: [[-220, -47.5], [-80, -47.5], [-80, 92.5], [-220, 92.5]],
-                },
-                {
-                    id: "mid-baseline-right",
-                    name: "Mid Baseline Right",
-                    kind: "polygon",
-                    points: [[80, -47.5], [220, -47.5], [220, 92.5], [80, 92.5]],
-                },
-                {
-                    id: "mid-wing-left",
-                    name: "Mid Wing Left",
-                    kind: "polygon",
-                    points: [[-220, 92.5], [-80, 92.5], [-80, 142.5], ...arcPoints(threeR, upperLeftSplit, 180 - cornerAngle)],
-                },
-                {
-                    id: "mid-center",
-                    name: "Mid Center",
-                    kind: "polygon",
-                    points: [[-80, 142.5], [80, 142.5], ...arcPoints(threeR, upperRightSplit, upperLeftSplit)],
-                },
-                {
-                    id: "mid-wing-right",
-                    name: "Mid Wing Right",
-                    kind: "polygon",
-                    points: [[80, 142.5], [80, 92.5], [220, 92.5], ...arcPoints(threeR, cornerAngle, upperRightSplit)],
-                },
-                {
-                    id: "three-corner-left",
-                    name: "Corner 3 Left",
-                    kind: "polygon",
-                    points: [[-250, -47.5], [-220, -47.5], [-220, 92.5], [-250, 92.5]],
-                },
-                {
-                    id: "three-corner-right",
-                    name: "Corner 3 Right",
-                    kind: "polygon",
-                    points: [[220, -47.5], [250, -47.5], [250, 92.5], [220, 92.5]],
-                },
-                {
-                    id: "three-wing-left",
-                    name: "3PT Wing Left",
-                    kind: "polygon",
-                    points: [[-250, 92.5], [-220, 92.5], ...arcPoints(threeR, 180 - cornerAngle, upperLeftSplit), [leftTopArcX, 350], [-250, 350]],
-                },
-                {
-                    id: "three-top",
-                    name: "3PT Top",
-                    kind: "polygon",
-                    points: [[leftTopArcX, 350], [rightTopArcX, 350], ...arcPoints(threeR, upperRightSplit, upperLeftSplit)],
-                },
-                {
-                    id: "three-wing-right",
-                    name: "3PT Wing Right",
-                    kind: "polygon",
-                    points: [[220, 92.5], [250, 92.5], [250, 350], [rightTopArcX, 350], ...arcPoints(threeR, upperRightSplit, cornerAngle)],
-                },
-            ];
-        }
-
-        function pointInPolygon(point, polygon) {
-            let inside = false;
-            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
-                const xi = polygon[i][0];
-                const yi = polygon[i][1];
-                const xj = polygon[j][0];
-                const yj = polygon[j][1];
-                const crosses = ((yi > point[1]) !== (yj > point[1]))
-                    && (point[0] < ((xj - xi) * (point[1] - yi)) / ((yj - yi) || 1e-9) + xi);
-                if (crosses) inside = !inside;
-            }
-            return inside;
-        }
-
-        function classifyShot(sx, sy) {
-            const shotZones = buildShotZones();
-            for (const zone of shotZones) {
-                if (pointInPolygon([sx, sy], zone.points)) {
-                    return zone.id;
-                }
-            }
-            return sy >= 142.5 ? "mid-center" : "paint";
-        }
-
         function renderShotDensity() {
             shotDensityMount.selectAll("*").remove();
 
             const team = teamSelect.value;
-            let currentShotData = [];
-
-            if (allShotsByTeam[team]) {
-                const shotTeamData = allShotsByTeam[team];
-                if (currentShotPlayer === "team" || !shotTeamData.by_player) {
-                    currentShotData = shotTeamData.team || [];
-                } else {
-                    currentShotData = shotTeamData.by_player[currentShotPlayer] || [];
-                }
-            }
+            const shotTeamData = allShotsByTeam[team];
+            refreshShotViewOptions(shotTeamData);
+            const currentShotData = getRawShotDataForSelection(shotTeamData);
 
             if (!Array.isArray(currentShotData) || currentShotData.length === 0) {
                 shotDensityMount.append("div")
                     .attr("class", "empty")
-                    .text("Shot density data is not available for this selection.");
+                    .text(getShotEmptyState(shotTeamData));
                 shotStatsMount.selectAll("*").remove();
-                shotChip.textContent = "No shot bins loaded";
+                shotChip.textContent = `${getShotSelectionLabel()} • no shot bins loaded`;
                 return;
             }
 
-            const zoneCounts = {};
-            let totalShots = 0;
-            currentShotData.forEach(d => {
-                const sx = Number(d.x) || 0;
-                const sy = Number(d.y) || 0;
-                const count = Number(d.count) || 0;
-                const zone = classifyShot(sx, sy);
-                zoneCounts[zone] = (zoneCounts[zone] || 0) + count;
-                totalShots += count;
-            });
+            const displayShotData = aggregateShotBins(currentShotData);
 
             const { width, height, x, y } = createShotCourtTransform(shotDensityMount.node()?.clientWidth || 760);
 
@@ -1746,97 +1996,34 @@
                 .attr("viewBox", `0 0 ${width} ${height}`)
                 .attr("preserveAspectRatio", "xMidYMid meet");
 
-            const maxZoneCount = Math.max(...Object.values(zoneCounts), 1);
-            const discreteReds = ["#fff5f0", "#fdd0c0", "#fca082", "#fb6a4a", "#de2d26", "#a50f15"];
-
-            function getZoneColor(count) {
-                if (count <= 0) return discreteReds[0];
-                const normalized = count / maxZoneCount;
-                const exaggerated = Math.pow(normalized, 0.45);
-                const bucket = Math.min(discreteReds.length - 1, Math.floor(exaggerated * discreteReds.length));
-                return discreteReds[Math.max(1, bucket)];
-            }
-
-            const zonesGroup = svg.append("g");
-            const shotZones = buildShotZones();
-
-            function polygonPath(points) {
-                const line = d3.line()(points.map(([px, py]) => [x(px), y(py)]));
-                return `${line} Z`;
-            }
-
-            function drawZone(id, name, pathData) {
-                const count = zoneCounts[id] || 0;
-                zonesGroup.append("path")
-                    .attr("d", pathData)
-                    .attr("fill", getZoneColor(count))
-                    .attr("fill-opacity", 0.88)
-                    .attr("stroke", "#1a202c")
-                    .attr("stroke-width", 1.8)
-                    .style("cursor", "pointer")
-                    .on("mousemove", (event) => {
-                        const pct = totalShots > 0 ? ((count / totalShots) * 100).toFixed(1) : 0;
-                        tooltip.style("opacity", 1)
-                            .html(`<strong>${name}</strong><br/>Shots: ${count}<br/>${pct}% of total`)
-                            .style("left", `${event.clientX + 14}px`)
-                            .style("top", `${event.clientY - 18}px`);
-                    })
-                    .on("mouseout", () => tooltip.style("opacity", 0));
-            }
-
-            const drawZones = [...shotZones].sort((left, right) => {
-                const priority = {
-                    paint: 0,
-                    "under-goal": 1,
-                    close: 2,
-                };
-                return (priority[left.id] ?? 0) - (priority[right.id] ?? 0);
-            });
-
-            drawZones.forEach(zone => {
-                drawZone(zone.id, zone.name, polygonPath(zone.points));
-            });
+            const maxCount = d3.max(displayShotData, d => Number(d.count) || 0) || 1;
+            const interpolator = d3.interpolateReds;
+            const color = d3.scaleSequential(interpolator).domain([0, maxCount]);
+            const radius = d3.scaleSqrt().domain([0, maxCount]).range([6, 22]);
 
             drawCourtLines(svg.append("g"), x, y);
 
-            // Add legend
-            const legendWidth = 120;
-            const legendHeight = 12;
-            const legendX = width - legendWidth - 30;
-            const legendY = 30;
-
-            const legendScale = d3.scaleLinear().domain([0, maxZoneCount]).range([0, legendWidth]);
-            const legendAxis = d3.axisBottom(legendScale).ticks(3).tickFormat(d3.format("d"));
-
-            const swatchWidth = legendWidth / discreteReds.length;
-            discreteReds.forEach((color, index) => {
-                svg.append("rect")
-                    .attr("x", legendX + index * swatchWidth)
-                    .attr("y", legendY)
-                    .attr("width", swatchWidth)
-                    .attr("height", legendHeight)
-                    .attr("fill", color)
-                    .attr("stroke", "#4a5568")
-                    .attr("stroke-width", 0.4);
-            });
-
             svg.append("g")
-                .attr("transform", `translate(${legendX}, ${legendY + legendHeight})`)
-                .call(legendAxis)
-                .selectAll("text")
-                .attr("font-size", 9);
+                .selectAll("circle")
+                .data(displayShotData)
+                .join("circle")
+                .attr("cx", d => x(Number(d.x) || 0))
+                .attr("cy", d => y(Number(d.y) || 0))
+                .attr("r", d => radius(Number(d.count) || 0))
+                .attr("fill", d => color(Number(d.count) || 0))
+                .attr("fill-opacity", currentShotView === "created" ? 0.84 : 0.74)
+                .attr("stroke", "#7f1d1d")
+                .attr("stroke-width", 1.1)
+                .attr("stroke-opacity", 0.38)
+                .on("mousemove", (event, d) => {
+                    tooltip.style("opacity", 1)
+                        .html(`<strong>${getShotSelectionLabel()}</strong><br/>Shots in area: ${d.count}<br/>Center: (${d.x}, ${d.y})`)
+                        .style("left", `${event.clientX + 14}px`)
+                        .style("top", `${event.clientY - 18}px`);
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
 
-            svg.append("text")
-                .attr("x", legendX + legendWidth / 2)
-                .attr("y", legendY - 6)
-                .attr("text-anchor", "middle")
-                .attr("font-size", 10)
-                .attr("font-weight", 600)
-                .attr("fill", "#2d3748")
-                .text("Shot Volume");
-
-            const zoneCount = Object.keys(zoneCounts).filter(k => zoneCounts[k] > 0).length;
-            shotChip.textContent = `${zoneCount} active zones • ${totalShots} total shots`;
+            shotChip.textContent = `${displayShotData.length} display circles • ${currentShotData.length} source bins`;
             renderShotStats(currentShotData);
         }
 
@@ -2071,27 +2258,52 @@
             const team = teamSelect.value;
             const shotTeamData = allShotsByTeam[team];
             currentShotPlayer = "team";
-            let playerOptions = [{ value: "team", label: "All Players (Team)" }];
-            
-            if (shotTeamData && shotTeamData.by_player && typeof shotTeamData.by_player === 'object') {
-                const playerNames = Object.keys(shotTeamData.by_player)
-                    .sort((a, b) => a.localeCompare(b));
-                playerOptions = playerOptions.concat(
-                    playerNames.map(name => ({ value: name, label: name }))
-                );
-            }
-            
-            fillSelect(shotPlayerSelect, playerOptions, "team");
+            syncShotPlayerSelect(shotTeamData);
             renderShotDensity();
         }
 
+        async function safeLoadJSON(url) {
+            try {
+                const resp = await fetch(url);
+                if (!resp.ok) return null;
+                const text = await resp.text();
+                return JSON.parse(text);
+            } catch(e) {
+                console.warn(`FETCH ERROR ${url}:`, e);
+                return null;
+            }
+        }
+
+        const CACHE_BUST = Date.now();
         Promise.all([
-            d3.json("assist_network_all_teams.json").catch(() => null),
-            d3.json("shot_heatmap_all_teams.json").catch(() => null),
-            d3.json("assist_network.json").catch(() => null),
-            d3.json("shot_heatmap.json").catch(() => null)
+            safeLoadJSON("assist_network_all_teams.json?v=" + CACHE_BUST),
+            safeLoadJSON("shot_heatmap_all_teams.json?v=" + CACHE_BUST),
+            safeLoadJSON("assist_network.json?v=" + CACHE_BUST),
+            safeLoadJSON("shot_heatmap.json?v=" + CACHE_BUST)
         ]).then(([assistAll, shotAll, assistSingle, shotSingle]) => {
-            if (assistAll && assistAll.data && assistAll.teams) {
+            const hasSingleAssist = assistSingle && Array.isArray(assistSingle.nodes) && Array.isArray(assistSingle.links);
+            const hasAllAssist = assistAll && assistAll.data && assistAll.teams;
+            const useSingleTeamData = PREFER_SINGLE_TEAM_DATA && hasSingleAssist;
+
+            if (useSingleTeamData) {
+                const fallbackTeam = assistSingle.nodes[0]?.team || "DAL";
+                const nodes = assistSingle.nodes.map(node => ({
+                    ...node,
+                    id: normalizeName(node.id),
+                    team: node.team || fallbackTeam,
+                    position: node.position || "Unknown"
+                }));
+                const nodeIds = new Set(nodes.map(n => n.id));
+                const links = assistSingle.links
+                    .map(link => ({
+                        source: normalizeName(link.source),
+                        target: normalizeName(link.target),
+                        value: Number(link.value) || 0
+                    }))
+                    .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
+                allAssistByTeam[fallbackTeam] = { nodes, links };
+                teamMeta = [{ abbreviation: fallbackTeam, full_name: fallbackTeam === "DAL" ? "Dallas Mavericks" : fallbackTeam }];
+            } else if (hasAllAssist) {
                 teamMeta = assistAll.teams;
                 teamMeta.forEach(t => {
                     const teamData = assistAll.data[t.abbreviation] || { nodes: [], links: [] };
@@ -2111,8 +2323,8 @@
                         .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
                     allAssistByTeam[t.abbreviation] = { nodes, links };
                 });
-            } else if (assistSingle && Array.isArray(assistSingle.nodes) && Array.isArray(assistSingle.links)) {
-                const fallbackTeam = "DAL";
+            } else if (hasSingleAssist) {
+                const fallbackTeam = assistSingle.nodes[0]?.team || "DAL";
                 const nodes = assistSingle.nodes.map(node => ({
                     ...node,
                     id: normalizeName(node.id),
@@ -2128,26 +2340,28 @@
                     }))
                     .filter(link => nodeIds.has(link.source) && nodeIds.has(link.target));
                 allAssistByTeam[fallbackTeam] = { nodes, links };
-                teamMeta = [{ abbreviation: fallbackTeam, full_name: "Dallas Mavericks" }];
+                teamMeta = [{ abbreviation: fallbackTeam, full_name: fallbackTeam === "DAL" ? "Dallas Mavericks" : fallbackTeam }];
             } else {
                 throw new Error("No assist dataset available.");
             }
 
-            if (shotAll && shotAll.data) {
+            if (useSingleTeamData && shotSingle && typeof shotSingle === 'object' && !Array.isArray(shotSingle)) {
+                const fallbackTeam = teamMeta[0].abbreviation;
+                allShotsByTeam[fallbackTeam] = normalizeShotTeamData(shotSingle);
+            } else if (useSingleTeamData && Array.isArray(shotSingle)) {
+                const fallbackTeam = teamMeta[0].abbreviation;
+                allShotsByTeam[fallbackTeam] = normalizeShotTeamData(shotSingle);
+            } else if (shotAll && shotAll.data) {
                 teamMeta.forEach(t => {
                     const shotData = shotAll.data[t.abbreviation];
-                    // Handle both old format (array) and new format (object with team/by_player)
-                    if (Array.isArray(shotData)) {
-                        allShotsByTeam[t.abbreviation] = { team: shotData, by_player: {} };
-                    } else if (shotData && typeof shotData === 'object') {
-                        allShotsByTeam[t.abbreviation] = shotData;
-                    } else {
-                        allShotsByTeam[t.abbreviation] = { team: [], by_player: {} };
-                    }
+                    allShotsByTeam[t.abbreviation] = normalizeShotTeamData(shotData);
                 });
+            } else if (shotSingle && typeof shotSingle === 'object' && !Array.isArray(shotSingle)) {
+                const fallbackTeam = teamMeta[0].abbreviation;
+                allShotsByTeam[fallbackTeam] = normalizeShotTeamData(shotSingle);
             } else if (Array.isArray(shotSingle)) {
                 const fallbackTeam = teamMeta[0].abbreviation;
-                allShotsByTeam[fallbackTeam] = { team: shotSingle, by_player: {} };
+                allShotsByTeam[fallbackTeam] = normalizeShotTeamData(shotSingle);
             }
 
             fillSelect(
@@ -2164,9 +2378,10 @@
 
             applyBtn.addEventListener("click", renderAll);
 
-            // Update highlight options when team changes
+            // Update filters and visual state when team changes
             teamSelect.addEventListener("change", () => {
                 updateHighlightPlayerOptions();
+                renderAll();
             });
 
             // Live update for min assists slider
@@ -2181,6 +2396,16 @@
             shotPlayerSelect.addEventListener("change", (e) => {
                 currentShotPlayer = e.target.value;
                 renderShotDensity();
+            });
+
+            shotViewButtons.forEach(button => {
+                button.addEventListener("click", () => {
+                    currentShotView = button.dataset.shotView;
+                    currentShotPlayer = "team";
+                    syncShotViewButtons();
+                    syncShotPlayerSelect(allShotsByTeam[teamSelect.value]);
+                    renderShotDensity();
+                });
             });
 
             vizToggleBtns.forEach(btn => {
