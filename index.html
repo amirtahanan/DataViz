@@ -869,6 +869,125 @@
             return `${parts[1]} ${parts[0]}`;
         }
 
+        function normalizeAliasKey(name) {
+            if (typeof name !== "string") {
+                return "";
+            }
+            return name
+                .toLowerCase()
+                .replace(/\./g, "")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function resolveCanonicalPlayerName(rawName, canonicalPlayers) {
+            const normalized = normalizeName(rawName);
+            if (!normalized) {
+                return normalized;
+            }
+
+            if (!Array.isArray(canonicalPlayers) || canonicalPlayers.length === 0) {
+                return normalized;
+            }
+
+            const canonicalByKey = new Map(
+                canonicalPlayers.map(name => [normalizeAliasKey(name), name])
+            );
+
+            const normalizedKey = normalizeAliasKey(normalized);
+            if (canonicalByKey.has(normalizedKey)) {
+                return canonicalByKey.get(normalizedKey);
+            }
+
+            const parts = normalizedKey.split(" ").filter(Boolean);
+            if (parts.length < 2 || !parts[0]) {
+                return normalized;
+            }
+
+            const firstInitial = parts[0][0];
+            const lastName = parts.slice(1).join(" ");
+
+            for (const candidate of canonicalPlayers) {
+                const candidateParts = normalizeAliasKey(candidate).split(" ").filter(Boolean);
+                if (candidateParts.length < 2 || !candidateParts[0]) {
+                    continue;
+                }
+
+                const candidateFirstInitial = candidateParts[0][0];
+                const candidateLastName = candidateParts.slice(1).join(" ");
+                if (candidateFirstInitial === firstInitial && candidateLastName === lastName) {
+                    return candidate;
+                }
+            }
+
+            return normalized;
+        }
+
+        function mergeShotBins(...binLists) {
+            const merged = new Map();
+
+            binLists.forEach(list => {
+                normalizeShotBins(list).forEach(bin => {
+                    const key = `${bin.x}|${bin.y}|${bin.bin_size}`;
+                    const existing = merged.get(key) || {
+                        x: bin.x,
+                        y: bin.y,
+                        count: 0,
+                        bin_size: bin.bin_size
+                    };
+                    existing.count += bin.count;
+                    merged.set(key, existing);
+                });
+            });
+
+            return [...merged.values()].sort((a, b) => b.count - a.count);
+        }
+
+        function remapShotBinMapByCanonicalName(binMap, canonicalPlayers) {
+            if (!binMap || typeof binMap !== "object") {
+                return {};
+            }
+
+            const remapped = {};
+            Object.entries(binMap).forEach(([name, bins]) => {
+                const canonicalName = resolveCanonicalPlayerName(name, canonicalPlayers);
+                remapped[canonicalName] = mergeShotBins(remapped[canonicalName], bins);
+            });
+
+            return remapped;
+        }
+
+        function remapShotPairMapByCanonicalName(pairMap, canonicalPlayers) {
+            if (!pairMap || typeof pairMap !== "object") {
+                return {};
+            }
+
+            const remapped = {};
+            Object.entries(pairMap).forEach(([pairKey, bins]) => {
+                const [rawAssister, rawShooter] = String(pairKey).split("->").map(part => part.trim());
+                const assister = resolveCanonicalPlayerName(rawAssister, canonicalPlayers);
+                const shooter = resolveCanonicalPlayerName(rawShooter, canonicalPlayers);
+                const canonicalPairKey = `${assister} -> ${shooter}`;
+                remapped[canonicalPairKey] = mergeShotBins(remapped[canonicalPairKey], bins);
+            });
+
+            return remapped;
+        }
+
+        function canonicalizeShotTeamData(shotTeamData, canonicalPlayers) {
+            if (!shotTeamData || !Array.isArray(canonicalPlayers) || canonicalPlayers.length === 0) {
+                return shotTeamData;
+            }
+
+            return {
+                ...shotTeamData,
+                by_player: remapShotBinMapByCanonicalName(shotTeamData.by_player, canonicalPlayers),
+                assisted_by_player: remapShotBinMapByCanonicalName(shotTeamData.assisted_by_player, canonicalPlayers),
+                by_assister: remapShotBinMapByCanonicalName(shotTeamData.by_assister, canonicalPlayers),
+                by_assist_pair: remapShotPairMapByCanonicalName(shotTeamData.by_assist_pair, canonicalPlayers)
+            };
+        }
+
         function fillSelect(selectEl, options, defaultValue) {
             selectEl.innerHTML = "";
             options.forEach(option => {
@@ -2363,6 +2482,14 @@
                 const fallbackTeam = teamMeta[0].abbreviation;
                 allShotsByTeam[fallbackTeam] = normalizeShotTeamData(shotSingle);
             }
+
+            teamMeta.forEach(t => {
+                const canonicalPlayers = (allAssistByTeam[t.abbreviation]?.nodes || []).map(node => node.id);
+                allShotsByTeam[t.abbreviation] = canonicalizeShotTeamData(
+                    allShotsByTeam[t.abbreviation],
+                    canonicalPlayers
+                );
+            });
 
             fillSelect(
                 teamSelect,
